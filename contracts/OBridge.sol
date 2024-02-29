@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -104,7 +104,7 @@ contract BridgeFee is Ownable{
     }
 }
 
-contract OBridge is BridgeFee{
+contract Otmoic is BridgeFee{
     using SafeERC20 for IERC20;
 
     enum TransferStatus {
@@ -123,12 +123,19 @@ contract OBridge is BridgeFee{
         address token,
         uint256 amount,
         bytes32 hashlock, // hash of the preimage
-        uint64 timelock, // UNIX timestamp seconds - locked UNTIL this time
+        bytes32 relayHashlock, // hash of the relay preimage
+        uint64 stepTimelock, // lock timestamp = agreementReachedTime + 1 * stepTimelock
         uint64 dstChainId,
         uint256 dstAddress,
-        uint64 bidId,
+        bytes32 bidId,
         uint256 tokenDst,
-        uint256 amountDst
+        uint256 amountDst,
+        uint256 nativeAmountDst,
+        uint64 agreementReachedTime,
+        string requestor,
+        string lpId,
+        string userSign,
+        string lpSign
     );
     event LogNewTransferIn(
         bytes32 transferId,
@@ -138,45 +145,96 @@ contract OBridge is BridgeFee{
         uint256 token_amount,
         uint256 eth_amount,
         bytes32 hashlock, // hash of the preimage
-        uint64 timelock, // UNIX timestamp seconds - locked UNTIL this time
+        uint64 stepTimelock, // lock timestamp = agreementReachedTime + 2 * stepTimelock
         uint64 srcChainId,
-        bytes32 srcTransferId // outbound transferId at src chain
+        bytes32 srcTransferId, // outbound transferId at src chain
+        uint64 agreementReachedTime
     );
-    event LogTransferConfirmed(bytes32 transferId, bytes32 preimage);
-    event LogTransferRefunded(bytes32 transferId);
+    event LogTransferOutConfirmed(bytes32 transferId, bytes32 preimage);
+    event LogTransferInConfirmed(bytes32 transferId, bytes32 preimage);
+    event LogTransferOutRefunded(bytes32 transferId);
+    event LogTransferInRefunded(bytes32 transferId);
+
+    error InvalidSender();
+    error InvalidAmount();
+    error ExpiredOp(string op, uint64 expiredAt);
+    error NotUnlock(string op, uint64 lockedUntil);
+    error InvalidHashlock();
+    error InvalidStatus();
+    error FailedToSendEther();
+
+    receive() external payable {}
 
     /**
      * @dev transfer sets up a new outbound transfer with hash time lock.
      */
     function transferOut(
         address _sender,
-        address _bridge,
+        address _receiver,
         address _token,
         uint256 _amount,
         bytes32 _hashlock,
-        uint64 _timelock,
+        bytes32 _relayHashlock,
+        uint64 _stepTimelock,
         uint64 _dstChainId,
         uint256 _dstAddress,
-        uint64 _bidId,
+        bytes32 _bidId,
         uint256 _tokenDst,
-        uint256 _amountDst
+        uint256 _amountDst,
+        uint256 _nativeAmountDst,
+        uint64 _agreementReachedTime,
+        string calldata _requestor,
+        string calldata _lpId,
+        string calldata _userSign,
+        string calldata _lpSign
     ) external payable {
-        require( msg.sender == _sender, "require sender");
-        
-        bytes32 transferId = _transfer(_sender, _bridge, _token, _amount, 0, _hashlock, _timelock);
+        if (msg.sender != _sender) {
+            revert InvalidSender();
+        }
+
+        if (_amount <= 0) {
+            revert InvalidAmount();
+        }
+
+        uint64 _timelock = _agreementReachedTime + 1 * _stepTimelock;
+        if (block.timestamp > _timelock) {
+            revert ExpiredOp("transfer out", _timelock);
+        }
+
+        uint256 _eth_mount = 0;
+        bytes32 _transferId = keccak256(
+            abi.encodePacked(
+                _sender, _receiver, _hashlock, _relayHashlock, _agreementReachedTime, _stepTimelock, _token, _amount, _eth_mount, block.chainid
+            )
+        );
+        if (transfers[_transferId] != TransferStatus.Null) {
+            revert InvalidStatus();
+        }
+
+        _transfer(_sender, _token, _amount, 0);
+
+        transfers[_transferId] = TransferStatus.Pending;
+
         emit LogNewTransferOut(
-            transferId,
+            _transferId,
             _sender,
-            _bridge,
+            _receiver,
             _token,
             _amount,
             _hashlock,
-            _timelock,
+            _relayHashlock,
+            _stepTimelock,
             _dstChainId,
             _dstAddress,
             _bidId,
             _tokenDst,
-            _amountDst
+            _amountDst,
+            _nativeAmountDst,
+            _agreementReachedTime,
+            _requestor,
+            _lpId,
+            _userSign,
+            _lpSign
         );
     }
 
@@ -190,55 +248,243 @@ contract OBridge is BridgeFee{
         uint256 _token_amount,
         uint256 _eth_amount,
         bytes32 _hashlock,
-        uint64 _timelock,
+        uint64 _stepTimelock,
         uint64 _srcChainId,
-        bytes32 _srcTransferId
+        bytes32 _srcTransferId,
+        uint64 _agreementReachedTime
     ) external payable  {
-        require( msg.sender == _sender, "require sender");
 
-        bytes32 transferId = _transfer(_sender, _dstAddress, _token, _token_amount, _eth_amount, _hashlock, _timelock);
+        if (msg.sender != _sender) {
+            revert InvalidSender();
+        }
+
+        if (_token_amount <= 0) {
+            revert InvalidAmount();
+        }
+
+        uint64 _timelock = _agreementReachedTime + 2 * _stepTimelock;
+        if (block.timestamp > _timelock) {
+            revert ExpiredOp("transfer in", _timelock);
+        }
+
+        bytes32 _transferId = keccak256(
+            abi.encodePacked(
+                _sender, _dstAddress, _hashlock, _agreementReachedTime, _stepTimelock, _token, _token_amount, _eth_amount, block.chainid
+            )
+        );
+        if (transfers[_transferId] != TransferStatus.Null) {
+            revert InvalidStatus();
+        }
+        
+        _transfer(_sender, _token, _token_amount, _eth_amount);
+        
+        transfers[_transferId] = TransferStatus.Pending;
+
         emit LogNewTransferIn(
-            transferId,
+            _transferId,
             _sender,
             _dstAddress,
             _token,
             _token_amount,
             _eth_amount,
             _hashlock,
-            _timelock,
+            _stepTimelock,
             _srcChainId,
-            _srcTransferId
+            _srcTransferId,
+            _agreementReachedTime
         );
     }
 
-    
-    function confirm(
+    function confirmTransferOut(
         address _sender,
         address _receiver,
         address _token,
         uint256 _token_amount,
         uint256 _eth_amount,
         bytes32 _hashlock,
-        uint64 _timelock,
-        bytes32 _preimage) external {
+        bytes32 _relayHashlock,
+        uint64 _stepTimelock,
+        bytes32 _preimage,
+        bytes32 _relayPreimage,
+        uint64 _agreementReachedTime
+    ) external {
+        uint64 _userConfirmTransferOutTimelock = _agreementReachedTime + 3 * _stepTimelock;
+        uint64 _relayConfirmTransferOutTimelock = _agreementReachedTime + 6 * _stepTimelock;
+        
+        bytes32 _transferId = keccak256(
+            abi.encodePacked(
+                _sender, _receiver, _hashlock, _relayHashlock, _agreementReachedTime, _stepTimelock, _token, _token_amount, _eth_amount, block.chainid
+            )
+        );
+        if (transfers[_transferId] != TransferStatus.Pending) {
+            revert InvalidStatus();
+        }
+        
+        if (block.timestamp > _relayConfirmTransferOutTimelock) {
+            revert ExpiredOp("confirm out", _relayConfirmTransferOutTimelock);
+        } else if (block.timestamp > _userConfirmTransferOutTimelock && block.timestamp <= _relayConfirmTransferOutTimelock) {
+            if (_relayHashlock != keccak256(abi.encodePacked(_relayPreimage))) {
+                revert InvalidHashlock();
+            }
+        } else {
+            if (_hashlock != keccak256(abi.encodePacked(_preimage)) && _relayHashlock != keccak256(abi.encodePacked(_relayPreimage))) {
+                revert InvalidHashlock();
+            }
+        }
 
-        bytes32 _transferId = keccak256(abi.encodePacked(_sender, _receiver, _hashlock, _timelock, _token, _token_amount, _eth_amount, block.chainid));
-        TransferStatus t = transfers[_transferId];
+        _confirm(_receiver, _token, _token_amount, _eth_amount);
+        
+        transfers[_transferId] = TransferStatus.Confirmed;
+        
+        emit LogTransferOutConfirmed(_transferId, _preimage);
+    }
 
-        require(t == TransferStatus.Pending, "not pending transfer");
-        require(_hashlock == keccak256(abi.encodePacked(_preimage)), "incorrect preimage");
+    function confirmTransferIn(
+        address _sender,
+        address _receiver,
+        address _token,
+        uint256 _token_amount,
+        uint256 _eth_amount,
+        bytes32 _hashlock,
+        uint64 _stepTimelock,
+        bytes32 _preimage,
+        uint64 _agreementReachedTime
+    ) external {
+
+        uint64 _confirmTransferInTimelock = _agreementReachedTime + 5 * _stepTimelock;
+
+        bytes32 _transferId = keccak256(
+            abi.encodePacked(
+                _sender, _receiver, _hashlock, _agreementReachedTime, _stepTimelock, _token, _token_amount, _eth_amount, block.chainid
+            )
+        );
+        if (transfers[_transferId] != TransferStatus.Pending) {
+            revert InvalidStatus();
+        }
+
+        if (block.timestamp > _confirmTransferInTimelock) {
+            revert ExpiredOp("confirm in", _confirmTransferInTimelock);
+        }      
+
+        if (_hashlock != keccak256(abi.encodePacked(_preimage))) {
+            revert InvalidHashlock();
+        }
+
+        _confirm(_receiver, _token, _token_amount, _eth_amount);
 
         transfers[_transferId] = TransferStatus.Confirmed;
+
+        emit LogTransferInConfirmed(_transferId, _preimage);
+    }
+
+    function refundTransferOut(
+        address _sender,
+        address _receiver,
+        address _token,
+        uint256 _token_amount,
+        uint256 _eth_amount,
+        bytes32 _hashlock,
+        bytes32 _relayHashlock,
+        uint64 _stepTimelock,
+        uint64 _agreementReachedTime
+    ) external {
+        uint64 _timelock = _agreementReachedTime + 7 * _stepTimelock;
+
+        bytes32 _transferId = keccak256(
+            abi.encodePacked(
+                _sender, _receiver, _hashlock, _relayHashlock, _agreementReachedTime, _stepTimelock, _token, _token_amount, _eth_amount, block.chainid
+            )
+        );
+        if (transfers[_transferId] != TransferStatus.Pending) {
+            revert InvalidStatus();
+        }
+
+        if (block.timestamp <= _timelock) {
+            revert NotUnlock("refund out", _timelock);
+        }
+
+        _refund(_sender, _token, _token_amount, _eth_amount);
+
+        transfers[_transferId] = TransferStatus.Refunded;
+
+        emit LogTransferOutRefunded(_transferId);
+    }
+
+    function refundTransferIn(
+        address _sender,
+        address _receiver,
+        address _token,
+        uint256 _token_amount,
+        uint256 _eth_amount,
+        bytes32 _hashlock,
+        uint64 _stepTimelock,
+        uint64 _agreementReachedTime
+    ) external {
+        uint64 _timelock = _agreementReachedTime + 7 * _stepTimelock;
+
+        bytes32 _transferId = keccak256(
+            abi.encodePacked(
+                _sender, _receiver, _hashlock, _agreementReachedTime, _stepTimelock, _token, _token_amount, _eth_amount, block.chainid
+            )
+        );
+        if (transfers[_transferId] != TransferStatus.Pending) {
+            revert InvalidStatus();
+        }
+
+        if (block.timestamp <= _timelock) {
+            revert NotUnlock("refund in", _timelock);
+        }
+
+        _refund(_sender, _token, _token_amount, _eth_amount);
+
+        transfers[_transferId] = TransferStatus.Refunded;
+
+        emit LogTransferInRefunded(_transferId);
+    }
+    
+    function _transfer(
+        address _sender,
+        address _token,
+        uint256 _token_amount,
+        uint256 _eth_amount
+    ) private {
+
+        if( _token == address(0) ) {
+            if (_eth_amount != 0) {
+                revert InvalidAmount();
+            }
+            if (_token_amount != msg.value) {
+                revert InvalidAmount();
+            }
+        } else {
+            if (_eth_amount != msg.value) {
+                revert InvalidAmount();
+            }
+            IERC20(_token).safeTransferFrom(_sender, address(this), _token_amount);
+        }
+
+    }
+
+    function _confirm(
+        address _receiver,
+        address _token,
+        uint256 _token_amount,
+        uint256 _eth_amount
+    ) private {
 
         if( _token == address(0) ) {
             uint256 fee = calcFee(_token, _token_amount);
             uint256 sendAmount = _token_amount - fee;
 
             (bool sent, bytes memory data) = _receiver.call{value: sendAmount}("");
-            require(sent, "Failed to send Ether");
+            if (sent != true) {
+                revert FailedToSendEther();
+            }
 
             (sent, data) = tollAddress.call{value: fee}("");
-            require(sent, "Failed to send Ether");
+            if (sent != true) {
+                revert FailedToSendEther();
+            }
         } else {
             uint256 fee = calcFee(_token, _token_amount);
             uint256 sendAmount = _token_amount - fee;
@@ -251,74 +497,38 @@ contract OBridge is BridgeFee{
                 sendAmount = _eth_amount - fee;
 
                 (bool sent, bytes memory data) = _receiver.call{value: sendAmount}("");
-                require(sent, "Failed to send Ether");
+                if (sent != true) {
+                    revert FailedToSendEther();
+                }
 
                 (sent, data) = tollAddress.call{value: fee}("");
-                require(sent, "Failed to send Ether");
+                if (sent != true) {
+                    revert FailedToSendEther();
+                }
             }
         } 
-        emit LogTransferConfirmed(_transferId, _preimage);
     }
 
-   
-    function refund(
+    function _refund(
         address _sender,
-        address _receiver,
         address _token,
         uint256 _token_amount,
-        uint256 _eth_amount,
-        bytes32 _hashlock,
-        uint64 _timelock) external {
-        bytes32 _transferId = keccak256(abi.encodePacked(_sender, _receiver, _hashlock, _timelock, _token, _token_amount, _eth_amount, block.chainid));
-        TransferStatus t = transfers[_transferId];
-
-        require(t == TransferStatus.Pending, "not pending transfer");
-        require(_timelock <= block.timestamp, "timelock not yet passed");
-
-        transfers[_transferId] = TransferStatus.Refunded;
+        uint256 _eth_amount
+    ) private {
 
         if( _token == address(0) ) {
             (bool sent, ) = _sender.call{value: _token_amount}("");
-            require(sent, "Failed to send Ether");
+            if (sent != true) {
+                revert FailedToSendEther();
+            }
         } else {
             IERC20(_token).safeTransfer(_sender, _token_amount);
             if( _eth_amount > 0 ) {
                 (bool sent, ) = _sender.call{value: _eth_amount}("");
-                require(sent, "Failed to send Ether");
+                if (sent != true) {
+                    revert FailedToSendEther();
+                }
             }
         }
-        emit LogTransferRefunded(_transferId);
     }
-
-    
-    function _transfer(
-        address _sender,
-        address _receiver,
-        address _token,
-        uint256 _token_amount,
-        uint256 _eth_amount,
-        bytes32 _hashlock,
-        uint64 _timelock
-    ) private returns (bytes32 transferId) {
-        require(_token_amount > 0, "invalid amount");
-        require(_timelock > block.timestamp, "invalid timelock");
-
-        transferId = keccak256(abi.encodePacked(_sender, _receiver, _hashlock, _timelock, _token, _token_amount, _eth_amount, block.chainid));
-        require(transfers[transferId] == TransferStatus.Null, "transfer exists");
-
-
-        if( _token == address(0) ) {
-            require(_eth_amount == 0, "Eth Amount should zero");
-            require(_token_amount == msg.value, "Eth Amount mismatch");
-        } else {
-            require(_eth_amount == msg.value, "Eth Amount mismatch");
-            IERC20(_token).safeTransferFrom(_sender, address(this), _token_amount);
-        }
-         
-
-        transfers[transferId] = TransferStatus.Pending;
-        return transferId;
-    }
-
-    receive() external payable {}
 }

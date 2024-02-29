@@ -5,15 +5,15 @@ const {
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 
-describe('OBridge', function () {
-    async function deployOBridge () {
+describe('Otmoic', function () {
+    async function deployOtmoic () {
         const [owner, otherAccount, user, lp] = await ethers.getSigners();
 
-        const OBridge = await hre.ethers.getContractFactory("OBridge");
-        const obridge = await OBridge.deploy()
-        await obridge.deployed();
+        const Otmoic = await hre.ethers.getContractFactory("Otmoic");
+        const otmoic = await Otmoic.deploy()
+        await otmoic.deployed();
 
-        return {obridge, owner, otherAccount, user, lp}
+        return {otmoic, owner, otherAccount, user, lp}
     }
     async function deployTestERC20Src () {
         const [owner, otherAccount] = await ethers.getSigners();
@@ -59,7 +59,7 @@ describe('OBridge', function () {
     //             let tercSrc = cache.tercSrc
     //             // let tercDst = cache.tercDst
     //             const {tercDst} = await loadFixture(deployTestERC20Dst);
-    //             const {obridge, owner, otherAccount, user, lp} = await loadFixture(deployOBridge);
+    //             const {otmoic, owner, otherAccount, user, lp} = await loadFixture(deployOtmoic);
 
     //             let token_amount_src = '1000000000000000000'
     //             let token_amount_dst = '1000000000000000'
@@ -97,7 +97,7 @@ describe('OBridge', function () {
     //                 token_amount_dst
     //             )
 
-    //             // await expect(obridge.connect(user).transferOut(
+    //             // await expect(otmoic.connect(user).transferOut(
     //             //     user.address,
     //             //     lp.address,
     //             //     tercSrc.address,
@@ -113,11 +113,11 @@ describe('OBridge', function () {
     //             // .to.emit(tercSrc, "Transfer")
     //             // .withArgs(
     //             //     user.address,
-    //             //     obridge.address,
+    //             //     otmoic.address,
     //             //     token_amount_src
     //             // )
 
-    //             // await expect(obridge.connect(lp).transferIn(
+    //             // await expect(otmoic.connect(lp).transferIn(
     //             //     lp.address,
     //             //     user.address,
     //             //     tercDst.address,
@@ -130,7 +130,7 @@ describe('OBridge', function () {
     //             //     {value: eth_amount}
     //             // ))
 
-    //             // await expect(obridge.connect(user).confirm(
+    //             // await expect(otmoic.connect(user).confirm(
     //             //     user.address,       // address _sender,
     //             //     lp.address,         // address _receiver,
     //             //     tercSrc.address,    // address _token,
@@ -141,7 +141,7 @@ describe('OBridge', function () {
     //             //     preimage            // bytes32 _preimage
     //             // ))
 
-    //             // await expect(obridge.connect(lp).confirm(
+    //             // await expect(otmoic.connect(lp).confirm(
     //             //     lp.address,
     //             //     user.address,
     //             //     tercDst.address,
