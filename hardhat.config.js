@@ -3,13 +3,11 @@ require('dotenv').config();
 
 // Go to https://infura.io/, sign up, create
 // a new App in its dashboard, and replace "KEY" with its key
-const INFURA_API_KEY = "KEY";
 
 // Replace this private key with your Goerli account private key
 // To export your private key from Metamask, open Metamask and
 // go to Account Details > Export Private Key
 // Be aware of NEVER putting real Ether into testing accounts
-const GOERLI_PRIVATE_KEY = "YOUR GOERLI PRIVATE KEY";
 const PRIV_KEY = process.env.PRIVATE_KEY;
 const PRIV_KEY2 = process.env.PRIVATE_KEY2;
 

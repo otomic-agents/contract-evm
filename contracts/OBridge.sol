@@ -114,7 +114,13 @@ contract Otmoic is BridgeFee{
         Refunded
     }
 
-    mapping(bytes32 => TransferStatus) public transfers;
+    struct SwapStatus {
+        TransferStatus transferStatus ;
+        uint256 nativeFee;
+        uint256 tokenFee;
+    }
+
+    mapping(bytes32 => SwapStatus) public swapStatus;
 
     event LogNewTransferOut(
         bytes32 transferId,
@@ -207,13 +213,13 @@ contract Otmoic is BridgeFee{
                 _sender, _receiver, _hashlock, _relayHashlock, _agreementReachedTime, _stepTimelock, _token, _amount, _eth_mount, block.chainid
             )
         );
-        if (transfers[_transferId] != TransferStatus.Null) {
+        if (swapStatus[_transferId].transferStatus != TransferStatus.Null) {
             revert InvalidStatus();
         }
 
-        _transfer(_sender, _token, _amount, 0);
+        _transfer(_transferId, _sender, _token, _amount, 0);
 
-        transfers[_transferId] = TransferStatus.Pending;
+        swapStatus[_transferId].transferStatus = TransferStatus.Pending;
 
         emit LogNewTransferOut(
             _transferId,
@@ -272,13 +278,13 @@ contract Otmoic is BridgeFee{
                 _sender, _dstAddress, _hashlock, _agreementReachedTime, _stepTimelock, _token, _token_amount, _eth_amount, block.chainid
             )
         );
-        if (transfers[_transferId] != TransferStatus.Null) {
+        if (swapStatus[_transferId].transferStatus != TransferStatus.Null) {
             revert InvalidStatus();
         }
         
-        _transfer(_sender, _token, _token_amount, _eth_amount);
+        _transfer(_transferId, _sender, _token, _token_amount, _eth_amount);
         
-        transfers[_transferId] = TransferStatus.Pending;
+        swapStatus[_transferId].transferStatus = TransferStatus.Pending;
 
         emit LogNewTransferIn(
             _transferId,
@@ -316,7 +322,7 @@ contract Otmoic is BridgeFee{
                 _sender, _receiver, _hashlock, _relayHashlock, _agreementReachedTime, _stepTimelock, _token, _token_amount, _eth_amount, block.chainid
             )
         );
-        if (transfers[_transferId] != TransferStatus.Pending) {
+        if (swapStatus[_transferId].transferStatus != TransferStatus.Pending) {
             revert InvalidStatus();
         }
         
@@ -332,9 +338,9 @@ contract Otmoic is BridgeFee{
             }
         }
 
-        _confirm(_receiver, _token, _token_amount, _eth_amount);
+        _confirm(_transferId, _receiver, _token, _token_amount, _eth_amount);
         
-        transfers[_transferId] = TransferStatus.Confirmed;
+        swapStatus[_transferId].transferStatus = TransferStatus.Confirmed;
         
         emit LogTransferOutConfirmed(_transferId, _preimage);
     }
@@ -358,7 +364,7 @@ contract Otmoic is BridgeFee{
                 _sender, _receiver, _hashlock, _agreementReachedTime, _stepTimelock, _token, _token_amount, _eth_amount, block.chainid
             )
         );
-        if (transfers[_transferId] != TransferStatus.Pending) {
+        if (swapStatus[_transferId].transferStatus != TransferStatus.Pending) {
             revert InvalidStatus();
         }
 
@@ -370,9 +376,9 @@ contract Otmoic is BridgeFee{
             revert InvalidHashlock();
         }
 
-        _confirm(_receiver, _token, _token_amount, _eth_amount);
+        _confirm(_transferId, _receiver, _token, _token_amount, _eth_amount);
 
-        transfers[_transferId] = TransferStatus.Confirmed;
+        swapStatus[_transferId].transferStatus = TransferStatus.Confirmed;
 
         emit LogTransferInConfirmed(_transferId, _preimage);
     }
@@ -395,7 +401,7 @@ contract Otmoic is BridgeFee{
                 _sender, _receiver, _hashlock, _relayHashlock, _agreementReachedTime, _stepTimelock, _token, _token_amount, _eth_amount, block.chainid
             )
         );
-        if (transfers[_transferId] != TransferStatus.Pending) {
+        if (swapStatus[_transferId].transferStatus != TransferStatus.Pending) {
             revert InvalidStatus();
         }
 
@@ -405,7 +411,7 @@ contract Otmoic is BridgeFee{
 
         _refund(_sender, _token, _token_amount, _eth_amount);
 
-        transfers[_transferId] = TransferStatus.Refunded;
+        swapStatus[_transferId].transferStatus = TransferStatus.Refunded;
 
         emit LogTransferOutRefunded(_transferId);
     }
@@ -427,7 +433,7 @@ contract Otmoic is BridgeFee{
                 _sender, _receiver, _hashlock, _agreementReachedTime, _stepTimelock, _token, _token_amount, _eth_amount, block.chainid
             )
         );
-        if (transfers[_transferId] != TransferStatus.Pending) {
+        if (swapStatus[_transferId].transferStatus != TransferStatus.Pending) {
             revert InvalidStatus();
         }
 
@@ -437,12 +443,13 @@ contract Otmoic is BridgeFee{
 
         _refund(_sender, _token, _token_amount, _eth_amount);
 
-        transfers[_transferId] = TransferStatus.Refunded;
+        swapStatus[_transferId].transferStatus = TransferStatus.Refunded;
 
         emit LogTransferInRefunded(_transferId);
     }
     
     function _transfer(
+        bytes32 _transferId,
         address _sender,
         address _token,
         uint256 _token_amount,
@@ -456,16 +463,22 @@ contract Otmoic is BridgeFee{
             if (_token_amount != msg.value) {
                 revert InvalidAmount();
             }
+            swapStatus[_transferId].nativeFee = calcFee(address(0), _token_amount);
         } else {
             if (_eth_amount != msg.value) {
                 revert InvalidAmount();
             }
             IERC20(_token).safeTransferFrom(_sender, address(this), _token_amount);
+            swapStatus[_transferId].tokenFee = calcFee(_token, _token_amount);
+            if (_eth_amount > 0) {
+                swapStatus[_transferId].nativeFee = calcFee(address(0), _eth_amount);
+            }
         }
 
     }
 
     function _confirm(
+        bytes32 _transferId,
         address _receiver,
         address _token,
         uint256 _token_amount,
@@ -473,7 +486,7 @@ contract Otmoic is BridgeFee{
     ) private {
 
         if( _token == address(0) ) {
-            uint256 fee = calcFee(_token, _token_amount);
+            uint256 fee = swapStatus[_transferId].nativeFee;
             uint256 sendAmount = _token_amount - fee;
 
             (bool sent, bytes memory data) = _receiver.call{value: sendAmount}("");
@@ -486,14 +499,14 @@ contract Otmoic is BridgeFee{
                 revert FailedToSendEther();
             }
         } else {
-            uint256 fee = calcFee(_token, _token_amount);
+            uint256 fee = swapStatus[_transferId].tokenFee;
             uint256 sendAmount = _token_amount - fee;
 
             IERC20(_token).safeTransfer(_receiver, sendAmount);
             IERC20(_token).safeTransfer(tollAddress, fee);
             if( _eth_amount > 0 ) {
 
-                fee = calcFee(address(0), _eth_amount);
+                fee = swapStatus[_transferId].nativeFee;
                 sendAmount = _eth_amount - fee;
 
                 (bool sent, bytes memory data) = _receiver.call{value: sendAmount}("");
