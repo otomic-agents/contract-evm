@@ -73,7 +73,7 @@ npx hardhat verify --network bsc_testnet <contract_address>
 - [v2.0.0: implement Otmoic contract](https://github.com/otmoic/otmoic-contract-evm/releases/tag/v2.0.0) 
 
 
-## Contract
+## Contact
 
 - [Discord](https://discord.com/invite/mPcNppqcAd)
 
