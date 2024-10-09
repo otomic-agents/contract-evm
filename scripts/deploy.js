@@ -20,29 +20,17 @@ async function main() {
     console.log(`Otmoic contract deployed ${otmoic.address}`);
 
     const TestERC20 = await hre.ethers.getContractFactory("TestERC20");
-    const oUSDC = await TestERC20.deploy(
-        hre.ethers.utils.parseEther("1000000"),
-        "otmoic-test-usdc",
-        "oUSDC",
-    );
+    const oUSDC = await TestERC20.deploy(hre.ethers.utils.parseEther("1000000"), "otmoic-test-usdc", "oUSDC");
     await oUSDC.deployed();
 
     console.log(`oUSDC contract deployed ${oUSDC.address}`);
 
-    const oBTC = await TestERC20.deploy(
-        hre.ethers.utils.parseEther("1000000"),
-        "otmoic-test-btc",
-        "oBTC",
-    );
+    const oBTC = await TestERC20.deploy(hre.ethers.utils.parseEther("1000000"), "otmoic-test-btc", "oBTC");
     await oBTC.deployed();
 
     console.log(`oBTC contract deployed ${oBTC.address}`);
 
-    const oETH = await TestERC20.deploy(
-        hre.ethers.utils.parseEther("1000000"),
-        "otmoic-test-eth",
-        "oETH",
-    );
+    const oETH = await TestERC20.deploy(hre.ethers.utils.parseEther("1000000"), "otmoic-test-eth", "oETH");
     await oETH.deployed();
 
     console.log(`oETH contract deployed ${oETH.address}`);

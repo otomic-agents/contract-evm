@@ -19,10 +19,7 @@ abstract contract Ownable is Context {
     address public owner;
     address public nextOwner;
 
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
@@ -95,10 +92,7 @@ contract BridgeFee is Ownable {
         tollAddress = toll;
     }
 
-    function calcFee(
-        address token,
-        uint256 value
-    ) internal view returns (uint256) {
+    function calcFee(address token, uint256 value) internal view returns (uint256) {
         uint256 fee = (value * basisPointsRate) / 10000;
 
         uint256 maxFee = maximumFee[token];
@@ -135,8 +129,9 @@ contract Otmoic is BridgeFee {
         address token,
         uint256 amount,
         bytes32 hashlock, // hash of the preimage
-        bytes32 relayHashlock, // hash of the relay preimage
-        uint64 stepTimelock, // lock timestamp = agreementReachedTime + 1 * stepTimelock
+        uint64 expectedSingleStepTime,
+        uint64 tolerantSingleStepTime,
+        uint64 earliestRefundTime,
         uint64 dstChainId,
         uint256 dstAddress,
         bytes32 bidId,
@@ -157,7 +152,9 @@ contract Otmoic is BridgeFee {
         uint256 token_amount,
         uint256 eth_amount,
         bytes32 hashlock, // hash of the preimage
-        uint64 stepTimelock, // lock timestamp = agreementReachedTime + 2 * stepTimelock
+        uint64 expectedSingleStepTime,
+        uint64 tolerantSingleStepTime,
+        uint64 earliestRefundTime,
         uint64 srcChainId,
         bytes32 srcTransferId, // outbound transferId at src chain
         uint64 agreementReachedTime
@@ -169,7 +166,9 @@ contract Otmoic is BridgeFee {
 
     error InvalidSender();
     error InvalidAmount();
+    error InvalidRefundTime();
     error ExpiredOp(string op, uint64 expiredAt);
+    error NotInOpWindow(string op, uint64 start, uint64 end);
     error NotUnlock(string op, uint64 lockedUntil);
     error InvalidHashlock();
     error InvalidStatus();
@@ -186,8 +185,9 @@ contract Otmoic is BridgeFee {
         address _token,
         uint256 _amount,
         bytes32 _hashlock,
-        bytes32 _relayHashlock,
-        uint64 _stepTimelock,
+        uint64 _expectedSingleStepTime,
+        uint64 _tolerantSingleStepTime,
+        uint64 _earliestRefundTime,
         uint64 _dstChainId,
         uint256 _dstAddress,
         bytes32 _bidId,
@@ -208,7 +208,11 @@ contract Otmoic is BridgeFee {
             revert InvalidAmount();
         }
 
-        uint64 _timelock = _agreementReachedTime + 1 * _stepTimelock;
+        if (_earliestRefundTime <= _agreementReachedTime + 3 * _expectedSingleStepTime + 3 * _tolerantSingleStepTime) {
+            revert InvalidRefundTime();
+        }
+
+        uint64 _timelock = _agreementReachedTime + 1 * _expectedSingleStepTime;
         if (block.timestamp > _timelock) {
             revert ExpiredOp("transfer out", _timelock);
         }
@@ -219,9 +223,10 @@ contract Otmoic is BridgeFee {
                 _sender,
                 _receiver,
                 _hashlock,
-                _relayHashlock,
                 _agreementReachedTime,
-                _stepTimelock,
+                _expectedSingleStepTime,
+                _tolerantSingleStepTime,
+                _earliestRefundTime,
                 _token,
                 _amount,
                 _eth_mount,
@@ -243,8 +248,9 @@ contract Otmoic is BridgeFee {
             _token,
             _amount,
             _hashlock,
-            _relayHashlock,
-            _stepTimelock,
+            _expectedSingleStepTime,
+            _tolerantSingleStepTime,
+            _earliestRefundTime,
             _dstChainId,
             _dstAddress,
             _bidId,
@@ -269,7 +275,9 @@ contract Otmoic is BridgeFee {
         uint256 _token_amount,
         uint256 _eth_amount,
         bytes32 _hashlock,
-        uint64 _stepTimelock,
+        uint64 _expectedSingleStepTime,
+        uint64 _tolerantSingleStepTime,
+        uint64 _earliestRefundTime,
         uint64 _srcChainId,
         bytes32 _srcTransferId,
         uint64 _agreementReachedTime
@@ -282,7 +290,11 @@ contract Otmoic is BridgeFee {
             revert InvalidAmount();
         }
 
-        uint64 _timelock = _agreementReachedTime + 2 * _stepTimelock;
+        if (_earliestRefundTime <= _agreementReachedTime + 3 * _expectedSingleStepTime + 3 * _tolerantSingleStepTime) {
+            revert InvalidRefundTime();
+        }
+
+        uint64 _timelock = _agreementReachedTime + 2 * _expectedSingleStepTime;
         if (block.timestamp > _timelock) {
             revert ExpiredOp("transfer in", _timelock);
         }
@@ -293,7 +305,9 @@ contract Otmoic is BridgeFee {
                 _dstAddress,
                 _hashlock,
                 _agreementReachedTime,
-                _stepTimelock,
+                _expectedSingleStepTime,
+                _tolerantSingleStepTime,
+                _earliestRefundTime,
                 _token,
                 _token_amount,
                 _eth_amount,
@@ -316,7 +330,9 @@ contract Otmoic is BridgeFee {
             _token_amount,
             _eth_amount,
             _hashlock,
-            _stepTimelock,
+            _expectedSingleStepTime,
+            _tolerantSingleStepTime,
+            _earliestRefundTime,
             _srcChainId,
             _srcTransferId,
             _agreementReachedTime
@@ -330,52 +346,48 @@ contract Otmoic is BridgeFee {
         uint256 _token_amount,
         uint256 _eth_amount,
         bytes32 _hashlock,
-        bytes32 _relayHashlock,
-        uint64 _stepTimelock,
+        uint64 _expectedSingleStepTime,
+        uint64 _tolerantSingleStepTime,
+        uint64 _earliestRefundTime,
         bytes32 _preimage,
-        bytes32 _relayPreimage,
         uint64 _agreementReachedTime
     ) external {
-        uint64 _userConfirmTransferOutTimelock = _agreementReachedTime +
-            3 *
-            _stepTimelock;
-        uint64 _relayConfirmTransferOutTimelock = _agreementReachedTime +
-            6 *
-            _stepTimelock;
-
         bytes32 _transferId = keccak256(
             abi.encodePacked(
                 _sender,
                 _receiver,
                 _hashlock,
-                _relayHashlock,
                 _agreementReachedTime,
-                _stepTimelock,
+                _expectedSingleStepTime,
+                _tolerantSingleStepTime,
+                _earliestRefundTime,
                 _token,
                 _token_amount,
                 _eth_amount,
                 block.chainid
             )
         );
+
         if (swapStatus[_transferId].transferStatus != TransferStatus.Pending) {
             revert InvalidStatus();
         }
 
-        if (block.timestamp > _relayConfirmTransferOutTimelock) {
-            revert ExpiredOp("confirm out", _relayConfirmTransferOutTimelock);
-        } else if (
-            block.timestamp > _userConfirmTransferOutTimelock &&
-            block.timestamp <= _relayConfirmTransferOutTimelock
-        ) {
-            if (_relayHashlock != keccak256(abi.encodePacked(_relayPreimage))) {
-                revert InvalidHashlock();
+        if (_hashlock != keccak256(abi.encodePacked(_preimage))) {
+            revert InvalidHashlock();
+        }
+
+        // sender is the user
+        if (msg.sender == _sender) {
+            uint64 _timelock = _agreementReachedTime + 3 * _expectedSingleStepTime;
+            if (block.timestamp > _timelock) {
+                revert ExpiredOp("user confirm out", _timelock);
             }
         } else {
-            if (
-                _hashlock != keccak256(abi.encodePacked(_preimage)) &&
-                _relayHashlock != keccak256(abi.encodePacked(_relayPreimage))
-            ) {
-                revert InvalidHashlock();
+            // sender is not the user
+            uint64 _startTimelock = _agreementReachedTime + 3 * _expectedSingleStepTime + 2 * _tolerantSingleStepTime;
+            uint64 _endTimelock = _agreementReachedTime + 3 * _expectedSingleStepTime + 3 * _tolerantSingleStepTime;
+            if (block.timestamp < _startTimelock || block.timestamp > _endTimelock) {
+                revert NotInOpWindow("non-user confirm out", _startTimelock, _endTimelock);
             }
         }
 
@@ -393,21 +405,21 @@ contract Otmoic is BridgeFee {
         uint256 _token_amount,
         uint256 _eth_amount,
         bytes32 _hashlock,
-        uint64 _stepTimelock,
+        uint64 _expectedSingleStepTime,
+        uint64 _tolerantSingleStepTime,
+        uint64 _earliestRefundTime,
         bytes32 _preimage,
         uint64 _agreementReachedTime
     ) external {
-        uint64 _confirmTransferInTimelock = _agreementReachedTime +
-            5 *
-            _stepTimelock;
-
         bytes32 _transferId = keccak256(
             abi.encodePacked(
                 _sender,
                 _receiver,
                 _hashlock,
                 _agreementReachedTime,
-                _stepTimelock,
+                _expectedSingleStepTime,
+                _tolerantSingleStepTime,
+                _earliestRefundTime,
                 _token,
                 _token_amount,
                 _eth_amount,
@@ -418,12 +430,23 @@ contract Otmoic is BridgeFee {
             revert InvalidStatus();
         }
 
-        if (block.timestamp > _confirmTransferInTimelock) {
-            revert ExpiredOp("confirm in", _confirmTransferInTimelock);
-        }
-
         if (_hashlock != keccak256(abi.encodePacked(_preimage))) {
             revert InvalidHashlock();
+        }
+
+        // sender is the lp
+        if (msg.sender == _sender) {
+            uint64 _timelock = _agreementReachedTime + 3 * _expectedSingleStepTime + 1 * _tolerantSingleStepTime;
+            if (block.timestamp > _timelock) {
+                revert ExpiredOp("lp confirm in", _timelock);
+            }
+        } else {
+            // sender is not the lp
+            uint64 _startTimelock = _agreementReachedTime + 3 * _expectedSingleStepTime + 1 * _tolerantSingleStepTime;
+            uint64 _endTimelock = _agreementReachedTime + 3 * _expectedSingleStepTime + 2 * _tolerantSingleStepTime;
+            if (block.timestamp < _startTimelock || block.timestamp > _endTimelock) {
+                revert NotInOpWindow("non-lp confirm in", _startTimelock, _endTimelock);
+            }
         }
 
         _confirm(_transferId, _receiver, _token, _token_amount, _eth_amount);
@@ -440,20 +463,20 @@ contract Otmoic is BridgeFee {
         uint256 _token_amount,
         uint256 _eth_amount,
         bytes32 _hashlock,
-        bytes32 _relayHashlock,
-        uint64 _stepTimelock,
-        uint64 _agreementReachedTime
+        uint64 _agreementReachedTime,
+        uint64 _expectedSingleStepTime,
+        uint64 _tolerantSingleStepTime,
+        uint64 _earliestRefundTime
     ) external {
-        uint64 _timelock = _agreementReachedTime + 7 * _stepTimelock;
-
         bytes32 _transferId = keccak256(
             abi.encodePacked(
                 _sender,
                 _receiver,
                 _hashlock,
-                _relayHashlock,
                 _agreementReachedTime,
-                _stepTimelock,
+                _expectedSingleStepTime,
+                _tolerantSingleStepTime,
+                _earliestRefundTime,
                 _token,
                 _token_amount,
                 _eth_amount,
@@ -464,8 +487,8 @@ contract Otmoic is BridgeFee {
             revert InvalidStatus();
         }
 
-        if (block.timestamp <= _timelock) {
-            revert NotUnlock("refund out", _timelock);
+        if (block.timestamp <= _earliestRefundTime) {
+            revert NotUnlock("refund out", _earliestRefundTime);
         }
 
         _refund(_sender, _token, _token_amount, _eth_amount);
@@ -482,18 +505,20 @@ contract Otmoic is BridgeFee {
         uint256 _token_amount,
         uint256 _eth_amount,
         bytes32 _hashlock,
-        uint64 _stepTimelock,
-        uint64 _agreementReachedTime
+        uint64 _agreementReachedTime,
+        uint64 _expectedSingleStepTime,
+        uint64 _tolerantSingleStepTime,
+        uint64 _earliestRefundTime
     ) external {
-        uint64 _timelock = _agreementReachedTime + 7 * _stepTimelock;
-
         bytes32 _transferId = keccak256(
             abi.encodePacked(
                 _sender,
                 _receiver,
                 _hashlock,
                 _agreementReachedTime,
-                _stepTimelock,
+                _expectedSingleStepTime,
+                _tolerantSingleStepTime,
+                _earliestRefundTime,
                 _token,
                 _token_amount,
                 _eth_amount,
@@ -504,8 +529,8 @@ contract Otmoic is BridgeFee {
             revert InvalidStatus();
         }
 
-        if (block.timestamp <= _timelock) {
-            revert NotUnlock("refund in", _timelock);
+        if (block.timestamp <= _earliestRefundTime) {
+            revert NotUnlock("refund in", _earliestRefundTime);
         }
 
         _refund(_sender, _token, _token_amount, _eth_amount);
@@ -529,25 +554,15 @@ contract Otmoic is BridgeFee {
             if (_token_amount != msg.value) {
                 revert InvalidAmount();
             }
-            swapStatus[_transferId].nativeFee = calcFee(
-                address(0),
-                _token_amount
-            );
+            swapStatus[_transferId].nativeFee = calcFee(address(0), _token_amount);
         } else {
             if (_eth_amount != msg.value) {
                 revert InvalidAmount();
             }
-            IERC20(_token).safeTransferFrom(
-                _sender,
-                address(this),
-                _token_amount
-            );
+            IERC20(_token).safeTransferFrom(_sender, address(this), _token_amount);
             swapStatus[_transferId].tokenFee = calcFee(_token, _token_amount);
             if (_eth_amount > 0) {
-                swapStatus[_transferId].nativeFee = calcFee(
-                    address(0),
-                    _eth_amount
-                );
+                swapStatus[_transferId].nativeFee = calcFee(address(0), _eth_amount);
             }
         }
     }
@@ -563,9 +578,7 @@ contract Otmoic is BridgeFee {
             uint256 fee = swapStatus[_transferId].nativeFee;
             uint256 sendAmount = _token_amount - fee;
 
-            (bool sent, bytes memory data) = _receiver.call{
-                value: sendAmount
-            }("");
+            (bool sent, bytes memory data) = _receiver.call{ value: sendAmount }("");
             if (sent != true) {
                 revert FailedToSendEther();
             }
@@ -584,9 +597,7 @@ contract Otmoic is BridgeFee {
                 fee = swapStatus[_transferId].nativeFee;
                 sendAmount = _eth_amount - fee;
 
-                (bool sent, bytes memory data) = _receiver.call{
-                    value: sendAmount
-                }("");
+                (bool sent, bytes memory data) = _receiver.call{ value: sendAmount }("");
                 if (sent != true) {
                     revert FailedToSendEther();
                 }
@@ -599,12 +610,7 @@ contract Otmoic is BridgeFee {
         }
     }
 
-    function _refund(
-        address _sender,
-        address _token,
-        uint256 _token_amount,
-        uint256 _eth_amount
-    ) private {
+    function _refund(address _sender, address _token, uint256 _token_amount, uint256 _eth_amount) private {
         if (_token == address(0)) {
             (bool sent, ) = _sender.call{ value: _token_amount }("");
             if (sent != true) {

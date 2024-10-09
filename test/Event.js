@@ -1,7 +1,4 @@
-const {
-    time,
-    loadFixture,
-} = require("@nomicfoundation/hardhat-network-helpers");
+const { time, loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 
@@ -15,13 +12,11 @@ describe("Otmoic", function () {
 
         const initialSupply = "10000000000000000000000";
 
-        const TestERC20Src =
-            await hre.ethers.getContractFactory("TestERC20Src");
+        const TestERC20Src = await hre.ethers.getContractFactory("TestERC20Src");
         const tercSrc = await TestERC20Src.deploy(initialSupply);
         await tercSrc.deployed();
 
-        const TestERC20Dst =
-            await hre.ethers.getContractFactory("TestERC20Dst");
+        const TestERC20Dst = await hre.ethers.getContractFactory("TestERC20Dst");
         const tercDst = await TestERC20Dst.deploy(initialSupply);
         await tercDst.deployed();
 
@@ -40,8 +35,7 @@ describe("Otmoic", function () {
     describe("event", function () {
         describe("in", function () {
             it("Should emit an event on transferIn and confirmTransferIn", async function () {
-                const { otmoic, owner, otherAccount, tercSrc } =
-                    await loadFixture(deploy);
+                const { otmoic, owner, otherAccount, tercSrc } = await loadFixture(deploy);
 
                 let agreementReachedTime = await time.latest();
                 let stepTimelock = 60;
@@ -51,10 +45,7 @@ describe("Otmoic", function () {
                 let token_amount = "1000000000000000000";
                 let eth_amount = "100000000000000000";
 
-                let preimage = ethers.utils.solidityPack(
-                    ["bytes32"],
-                    [new Array(32).fill(2)],
-                );
+                let preimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(2)]);
                 let hashlock = ethers.utils.keccak256(preimage);
 
                 // console.log('otmoic address:', otmoic.address)
@@ -113,8 +104,7 @@ describe("Otmoic", function () {
             });
 
             it("Should emit an event on transferIn and refundTransferIn", async function () {
-                const { otmoic, owner, otherAccount, tercSrc } =
-                    await loadFixture(deploy);
+                const { otmoic, owner, otherAccount, tercSrc } = await loadFixture(deploy);
 
                 let agreementReachedTime = await time.latest();
                 let stepTimelock = 60;
@@ -124,10 +114,7 @@ describe("Otmoic", function () {
                 let token_amount = "1000000000000000000";
                 let eth_amount = "100000000000000000";
 
-                let preimage = ethers.utils.solidityPack(
-                    ["bytes32"],
-                    [new Array(32).fill(2)],
-                );
+                let preimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(2)]);
                 let hashlock = ethers.utils.keccak256(preimage);
 
                 // console.log('otmoic address:', otmoic.address)
@@ -165,9 +152,7 @@ describe("Otmoic", function () {
                         agreementReachedTime, // uint64 agreementReachedTime
                     );
 
-                await time.setNextBlockTimestamp(
-                    agreementReachedTime + 7 * stepTimelock + 1,
-                );
+                await time.setNextBlockTimestamp(agreementReachedTime + 7 * stepTimelock + 1);
                 await expect(
                     otmoic.refundTransferIn(
                         owner.address, // address _sender,
@@ -195,8 +180,7 @@ describe("Otmoic", function () {
             let lpSign = "lpSign";
 
             it("Should emit an event on transferOut and confirmTransferOut", async function () {
-                const { otmoic, owner, otherAccount, tercSrc, tercDst } =
-                    await loadFixture(deploy);
+                const { otmoic, owner, otherAccount, tercSrc, tercDst } = await loadFixture(deploy);
 
                 const ownerBalance = await tercDst.balanceOf(owner.address);
                 // console.log(ownerBalance)
@@ -209,16 +193,10 @@ describe("Otmoic", function () {
                 let dstChainId = "60";
                 let bidId = ethers.utils.formatBytes32String("1");
                 let eth_amount = "0";
-                let preimage = ethers.utils.solidityPack(
-                    ["bytes32"],
-                    [new Array(32).fill(2)],
-                );
+                let preimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(2)]);
                 let hashlock = ethers.utils.keccak256(preimage);
 
-                let relayPreimage = ethers.utils.solidityPack(
-                    ["bytes32"],
-                    [new Array(32).fill(3)],
-                );
+                let relayPreimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(3)]);
                 let relayHashlock = ethers.utils.keccak256(relayPreimage);
 
                 await expect(tercSrc.approve(otmoic.address, token_amount));
@@ -291,8 +269,7 @@ describe("Otmoic", function () {
             });
 
             it("Should emit an event on transferOut and refundTransferOut", async function () {
-                const { otmoic, owner, otherAccount, tercSrc, tercDst } =
-                    await loadFixture(deploy);
+                const { otmoic, owner, otherAccount, tercSrc, tercDst } = await loadFixture(deploy);
 
                 const ownerBalance = await tercDst.balanceOf(owner.address);
                 // console.log(ownerBalance)
@@ -305,16 +282,10 @@ describe("Otmoic", function () {
                 let dstChainId = "60";
                 let bidId = ethers.utils.formatBytes32String("1");
                 let eth_amount = "0";
-                let preimage = ethers.utils.solidityPack(
-                    ["bytes32"],
-                    [new Array(32).fill(2)],
-                );
+                let preimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(2)]);
                 let hashlock = ethers.utils.keccak256(preimage);
 
-                let relayPreimage = ethers.utils.solidityPack(
-                    ["bytes32"],
-                    [new Array(32).fill(3)],
-                );
+                let relayPreimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(3)]);
                 let relayHashlock = ethers.utils.keccak256(relayPreimage);
 
                 await expect(tercSrc.approve(otmoic.address, token_amount));
@@ -364,9 +335,7 @@ describe("Otmoic", function () {
                         lpSign, // string lpSign
                     );
 
-                await time.setNextBlockTimestamp(
-                    agreementReachedTime + 7 * stepTimelock + 1,
-                );
+                await time.setNextBlockTimestamp(agreementReachedTime + 7 * stepTimelock + 1);
                 await expect(
                     otmoic.refundTransferOut(
                         owner.address, // address _sender,

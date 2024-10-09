@@ -14,14 +14,10 @@ async function main() {
 `);
 
     const userBalance = await userWallet.getBalance();
-    console.log(
-        `Load user wallet: ${userWallet.address} -> native token: ${userBalance}`,
-    );
+    console.log(`Load user wallet: ${userWallet.address} -> native token: ${userBalance}`);
 
     const lpBalance = await lpWallet.getBalance();
-    console.log(
-        `Load lp wallet: ${lpWallet.address} -> native token: ${lpBalance}`,
-    );
+    console.log(`Load lp wallet: ${lpWallet.address} -> native token: ${lpBalance}`);
 
     const otmoic = await ethers.getContractAt("Otmoic", OBRIDGE_ADDR);
     console.log(`Otmoic contract connected: ${otmoic.address}`);
@@ -31,24 +27,16 @@ async function main() {
     native token <--> native token: swap 10000 user native token to 20000 lp native token
 `);
     let token_amount_src = BigNumber.from("10000");
-    assert(
-        token_amount_src.lt(userBalance),
-        "user has insufficient native token for swap",
-    );
+    assert(token_amount_src.lt(userBalance), "user has insufficient native token for swap");
 
     let token_amount_dst = BigNumber.from("20000");
-    assert(
-        token_amount_dst.lt(lpBalance),
-        "lp has insufficient native token for swap",
-    );
+    assert(token_amount_dst.lt(lpBalance), "lp has insufficient native token for swap");
 
     let nativeTokenAddress = "0x0000000000000000000000000000000000000000";
     let preimage = new Array(32).fill(2);
     let relayPreimage = new Array(32).fill(3);
     let hashlock = utils.keccak256(utils.solidityPack(["bytes32"], [preimage]));
-    let relayHashlock = utils.keccak256(
-        utils.solidityPack(["bytes32"], [relayPreimage]),
-    );
+    let relayHashlock = utils.keccak256(utils.solidityPack(["bytes32"], [relayPreimage]));
 
     let stepTimelock = 60;
 

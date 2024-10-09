@@ -1,7 +1,4 @@
-const {
-    time,
-    loadFixture,
-} = require("@nomicfoundation/hardhat-network-helpers");
+const { time, loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 
@@ -45,8 +42,7 @@ describe("Otmoic", function () {
             it("TokenA(ERC20) -> TokenB(ERC20)", async function () {
                 const { tercSrc } = await loadFixture(deployTestERC20Src);
                 const { tercDst } = await loadFixture(deployTestERC20Dst);
-                const { otmoic, owner, otherAccount, user, lp } =
-                    await loadFixture(deployOtmoic);
+                const { otmoic, owner, otherAccount, user, lp } = await loadFixture(deployOtmoic);
 
                 Object.assign(cache, {
                     tercSrc,
@@ -78,12 +74,8 @@ describe("Otmoic", function () {
                 let userSign = "userSign";
                 let lpSign = "lpSign";
 
-                let hashlock = ethers.utils.keccak256(
-                    ethers.utils.solidityPack(["bytes32"], [preimage]),
-                );
-                let relayHashlock = ethers.utils.keccak256(
-                    ethers.utils.solidityPack(["bytes32"], [relayPreimage]),
-                );
+                let hashlock = ethers.utils.keccak256(ethers.utils.solidityPack(["bytes32"], [preimage]));
+                let relayHashlock = ethers.utils.keccak256(ethers.utils.solidityPack(["bytes32"], [relayPreimage]));
 
                 await expect(tercSrc.transfer(user.address, token_amount_src))
                     .to.emit(tercSrc, "Transfer")
@@ -93,11 +85,7 @@ describe("Otmoic", function () {
                     .to.emit(tercDst, "Transfer")
                     .withArgs(owner.address, lp.address, token_amount_dst);
 
-                await expect(
-                    tercSrc
-                        .connect(user)
-                        .approve(otmoic.address, token_amount_src),
-                );
+                await expect(tercSrc.connect(user).approve(otmoic.address, token_amount_src));
                 await expect(
                     otmoic
                         .connect(user)
@@ -125,11 +113,7 @@ describe("Otmoic", function () {
                     .to.emit(tercSrc, "Transfer")
                     .withArgs(user.address, otmoic.address, token_amount_src);
 
-                await expect(
-                    tercDst
-                        .connect(lp)
-                        .approve(otmoic.address, token_amount_dst),
-                );
+                await expect(tercDst.connect(lp).approve(otmoic.address, token_amount_dst));
                 await expect(
                     otmoic
                         .connect(lp)
@@ -207,15 +191,10 @@ describe("Otmoic", function () {
                 let srcChainId = "60";
                 let dstChainId = "60";
                 let bidId = ethers.utils.formatBytes32String("2");
-                let nativeTokenAddress =
-                    "0x0000000000000000000000000000000000000000";
+                let nativeTokenAddress = "0x0000000000000000000000000000000000000000";
 
-                let hashlock = ethers.utils.keccak256(
-                    ethers.utils.solidityPack(["bytes32"], [preimage]),
-                );
-                let relayHashlock = ethers.utils.keccak256(
-                    ethers.utils.solidityPack(["bytes32"], [relayPreimage]),
-                );
+                let hashlock = ethers.utils.keccak256(ethers.utils.solidityPack(["bytes32"], [preimage]));
+                let relayHashlock = ethers.utils.keccak256(ethers.utils.solidityPack(["bytes32"], [relayPreimage]));
 
                 let requestor = "did:requestor";
                 let lpId = "did:lp";
@@ -255,11 +234,7 @@ describe("Otmoic", function () {
                     .to.emit(otmoic, "LogNewTransferOut")
                     .and.changeEtherBalance(otmoic, token_amount_src);
 
-                await expect(
-                    tercDst
-                        .connect(lp)
-                        .approve(otmoic.address, token_amount_dst),
-                );
+                await expect(tercDst.connect(lp).approve(otmoic.address, token_amount_dst));
                 await expect(
                     otmoic.connect(lp).transferIn(
                         lp.address, // address _sender,
@@ -334,15 +309,10 @@ describe("Otmoic", function () {
                 let srcChainId = "60";
                 let dstChainId = "60";
                 let bidId = ethers.utils.formatBytes32String("3");
-                let nativeTokenAddress =
-                    "0x0000000000000000000000000000000000000000";
+                let nativeTokenAddress = "0x0000000000000000000000000000000000000000";
 
-                let hashlock = ethers.utils.keccak256(
-                    ethers.utils.solidityPack(["bytes32"], [preimage]),
-                );
-                let relayHashlock = ethers.utils.keccak256(
-                    ethers.utils.solidityPack(["bytes32"], [relayPreimage]),
-                );
+                let hashlock = ethers.utils.keccak256(ethers.utils.solidityPack(["bytes32"], [preimage]));
+                let relayHashlock = ethers.utils.keccak256(ethers.utils.solidityPack(["bytes32"], [relayPreimage]));
 
                 let requestor = "did:requestor";
                 let lpId = "did:lp";
@@ -354,11 +324,7 @@ describe("Otmoic", function () {
                     .to.emit(tercSrc, "Transfer")
                     .withArgs(owner.address, user.address, token_amount_src);
 
-                await expect(
-                    tercSrc
-                        .connect(user)
-                        .approve(otmoic.address, token_amount_src),
-                );
+                await expect(tercSrc.connect(user).approve(otmoic.address, token_amount_src));
                 await expect(
                     otmoic.connect(user).transferOut(
                         user.address, // address _sender,
