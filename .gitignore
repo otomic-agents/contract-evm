@@ -17,3 +17,6 @@ deployments/*
 
 # IDE
 .idea
+
+temp-scripts
+.DS_Store
