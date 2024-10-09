@@ -463,10 +463,10 @@ contract Otmoic is BridgeFee {
         uint256 _token_amount,
         uint256 _eth_amount,
         bytes32 _hashlock,
-        uint64 _agreementReachedTime,
         uint64 _expectedSingleStepTime,
         uint64 _tolerantSingleStepTime,
-        uint64 _earliestRefundTime
+        uint64 _earliestRefundTime,
+        uint64 _agreementReachedTime
     ) external {
         bytes32 _transferId = keccak256(
             abi.encodePacked(
@@ -505,10 +505,10 @@ contract Otmoic is BridgeFee {
         uint256 _token_amount,
         uint256 _eth_amount,
         bytes32 _hashlock,
-        uint64 _agreementReachedTime,
         uint64 _expectedSingleStepTime,
         uint64 _tolerantSingleStepTime,
-        uint64 _earliestRefundTime
+        uint64 _earliestRefundTime,
+        uint64 _agreementReachedTime
     ) external {
         bytes32 _transferId = keccak256(
             abi.encodePacked(

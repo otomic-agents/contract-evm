@@ -38,7 +38,10 @@ describe("Otmoic", function () {
                 const { otmoic, owner, otherAccount, tercSrc } = await loadFixture(deploy);
 
                 let agreementReachedTime = await time.latest();
-                let stepTimelock = 60;
+                let expectedSingleStepTime = 60;
+                let tolerantSingleStepTime = 120;
+                let earliestRefundTime =
+                    agreementReachedTime + 3 * expectedSingleStepTime + 3 * tolerantSingleStepTime + 1;
                 let srcChainId = "60";
                 let srcTransferId = new Array(32).fill(3);
 
@@ -55,16 +58,18 @@ describe("Otmoic", function () {
 
                 await expect(
                     otmoic.transferIn(
-                        owner.address, // address _sender,
-                        otherAccount.address, // address _dstAddress,
-                        tercSrc.address, // address _token,
-                        token_amount, // uint256 _token_amount,
-                        eth_amount, // uint256 _eth_amount,
-                        hashlock, // bytes32 _hashlock,
-                        stepTimelock, // uint64 _stepTimelock,
-                        srcChainId, // uint64 _srcChainId,
-                        srcTransferId, // bytes32 _srcTransferId
-                        agreementReachedTime, // uint64 _agreementReachedTime
+                        owner.address,
+                        otherAccount.address,
+                        tercSrc.address,
+                        token_amount,
+                        eth_amount,
+                        hashlock,
+                        expectedSingleStepTime,
+                        tolerantSingleStepTime,
+                        earliestRefundTime,
+                        srcChainId,
+                        srcTransferId,
+                        agreementReachedTime,
                         { value: eth_amount },
                     ),
                 )
@@ -77,7 +82,9 @@ describe("Otmoic", function () {
                         token_amount, // uint256 token_amount,
                         eth_amount, // uint256 eth_amount,
                         anyValue, // bytes32 hashlock, // hash of the preimage
-                        stepTimelock, // uint64 stepTimelock, // lock timestamp = agreementReachedTime + 2 * stepTimelock
+                        expectedSingleStepTime, // uint64 expectedSingleStepTime
+                        tolerantSingleStepTime, // uint64 tolerantSingleStepTime
+                        earliestRefundTime, // uint64 earliestRefundTime
                         srcChainId, // uint64 srcChainId,
                         anyValue, // bytes32 srcTransferId // outbound transferId at src chain
                         agreementReachedTime, // uint64 agreementReachedTime
@@ -85,15 +92,17 @@ describe("Otmoic", function () {
 
                 await expect(
                     otmoic.confirmTransferIn(
-                        owner.address, // address _sender,
-                        otherAccount.address, // address _receiver,
-                        tercSrc.address, // address _token,
-                        token_amount, // uint256 _token_amount,
-                        eth_amount, // uint256 _eth_amount,
-                        hashlock, // bytes32 _hashlock,
-                        stepTimelock, // uint64 _stepTimelock,
-                        preimage, // bytes32 _preimage,
-                        agreementReachedTime, // uint64 _agreementReachedTime
+                        owner.address,
+                        otherAccount.address,
+                        tercSrc.address,
+                        token_amount,
+                        eth_amount,
+                        hashlock,
+                        expectedSingleStepTime,
+                        tolerantSingleStepTime,
+                        earliestRefundTime,
+                        preimage,
+                        agreementReachedTime,
                     ),
                 )
                     .to.emit(otmoic, "LogTransferInConfirmed")
@@ -107,7 +116,10 @@ describe("Otmoic", function () {
                 const { otmoic, owner, otherAccount, tercSrc } = await loadFixture(deploy);
 
                 let agreementReachedTime = await time.latest();
-                let stepTimelock = 60;
+                let expectedSingleStepTime = 60;
+                let tolerantSingleStepTime = 120;
+                let earliestRefundTime =
+                    agreementReachedTime + 3 * expectedSingleStepTime + 3 * tolerantSingleStepTime + 1;
                 let srcChainId = "60";
                 let srcTransferId = new Array(32).fill(3);
 
@@ -124,16 +136,18 @@ describe("Otmoic", function () {
 
                 await expect(
                     otmoic.transferIn(
-                        owner.address, // address _sender,
-                        otherAccount.address, // address _dstAddress,
-                        tercSrc.address, // address _token,
-                        token_amount, // uint256 _token_amount,
-                        eth_amount, // uint256 _eth_amount,
-                        hashlock, // bytes32 _hashlock,
-                        stepTimelock, // uint64 _stepTimelock,
-                        srcChainId, // uint64 _srcChainId,
-                        srcTransferId, // bytes32 _srcTransferId
-                        agreementReachedTime, // uint64 _agreementReachedTime
+                        owner.address,
+                        otherAccount.address,
+                        tercSrc.address,
+                        token_amount,
+                        eth_amount,
+                        hashlock,
+                        expectedSingleStepTime,
+                        tolerantSingleStepTime,
+                        earliestRefundTime,
+                        srcChainId,
+                        srcTransferId,
+                        agreementReachedTime,
                         { value: eth_amount },
                     ),
                 )
@@ -146,23 +160,27 @@ describe("Otmoic", function () {
                         token_amount, // uint256 token_amount,
                         eth_amount, // uint256 eth_amount,
                         anyValue, // bytes32 hashlock, // hash of the preimage
-                        stepTimelock, // uint64 stepTimelock, // lock timestamp = agreementReachedTime + 2 * stepTimelock
+                        expectedSingleStepTime, // uint64 expectedSingleStepTime
+                        tolerantSingleStepTime, // uint64 tolerantSingleStepTime
+                        earliestRefundTime, // uint64 earliestRefundTime
                         srcChainId, // uint64 srcChainId,
                         anyValue, // bytes32 srcTransferId // outbound transferId at src chain
                         agreementReachedTime, // uint64 agreementReachedTime
                     );
 
-                await time.setNextBlockTimestamp(agreementReachedTime + 7 * stepTimelock + 1);
+                await time.setNextBlockTimestamp(earliestRefundTime + 1);
                 await expect(
                     otmoic.refundTransferIn(
-                        owner.address, // address _sender,
-                        otherAccount.address, // address _receiver,
-                        tercSrc.address, // address _token,
-                        token_amount, // uint256 _token_amount,
-                        eth_amount, // uint256 _eth_amount,
-                        hashlock, // bytes32 _hashlock,
-                        stepTimelock, // uint64 _stepTimelock,
-                        agreementReachedTime, // uint64 _agreementReachedTime
+                        owner.address,
+                        otherAccount.address,
+                        tercSrc.address,
+                        token_amount,
+                        eth_amount,
+                        hashlock,
+                        expectedSingleStepTime,
+                        tolerantSingleStepTime,
+                        earliestRefundTime,
+                        agreementReachedTime,
                     ),
                 )
                     .to.emit(otmoic, "LogTransferInRefunded")
@@ -189,38 +207,39 @@ describe("Otmoic", function () {
                 let token_amount_dst = "1000000000000000";
 
                 let agreementReachedTime = await time.latest();
-                let stepTimelock = 60;
+                let expectedSingleStepTime = 60;
+                let tolerantSingleStepTime = 120;
+                let earliestRefundTime =
+                    agreementReachedTime + 3 * expectedSingleStepTime + 3 * tolerantSingleStepTime + 1;
                 let dstChainId = "60";
                 let bidId = ethers.utils.formatBytes32String("1");
                 let eth_amount = "0";
                 let preimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(2)]);
                 let hashlock = ethers.utils.keccak256(preimage);
 
-                let relayPreimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(3)]);
-                let relayHashlock = ethers.utils.keccak256(relayPreimage);
-
                 await expect(tercSrc.approve(otmoic.address, token_amount));
 
                 await expect(
                     otmoic.transferOut(
-                        owner.address, // address _sender,
-                        otherAccount.address, // address _bridge,
-                        tercSrc.address, // address _token,
-                        token_amount, // uint256 _amount,
-                        hashlock, // bytes32 _hashlock,
-                        relayHashlock, // bytes32 _relayHashlock,
-                        stepTimelock, // uint64 _stepTimelock,
-                        dstChainId, // uint64 _dstChainId,
-                        owner.address, // address _dstAddress,
-                        bidId, // bytes32 _bidId,
-                        tercDst.address, // uint256 _tokenDst,
-                        token_amount_dst, // uint256 _amountDst,
-                        eth_amount, // uint256 _nativeAmountDst,
-                        agreementReachedTime, // uint64 _agreementReachedTime,
-                        requestor, // string calldata _requestor,
-                        lpId, // string calldata _lpId,
-                        userSign, // string calldata _userSign,
-                        lpSign, // string calldata _lpSign
+                        owner.address,
+                        otherAccount.address,
+                        tercSrc.address,
+                        token_amount,
+                        hashlock,
+                        expectedSingleStepTime,
+                        tolerantSingleStepTime,
+                        earliestRefundTime,
+                        dstChainId,
+                        owner.address,
+                        bidId,
+                        tercDst.address,
+                        token_amount_dst,
+                        eth_amount,
+                        agreementReachedTime,
+                        requestor,
+                        lpId,
+                        userSign,
+                        lpSign,
                     ),
                 )
                     .to.emit(otmoic, "LogNewTransferOut")
@@ -231,8 +250,9 @@ describe("Otmoic", function () {
                         tercSrc.address, // address token,
                         token_amount, // uint256 amount,
                         anyValue, // bytes32 hashlock, // hash of the preimage
-                        anyValue, // bytes32 relayHashlock, // hash of the relayPreimage
-                        stepTimelock, // uint64 stepTimelock, // lock timestamp = agreementReachedTime + 1 * stepTimelock
+                        expectedSingleStepTime, // uint64 expectedSingleStepTime,
+                        tolerantSingleStepTime, // uint64 tolerantSingleStepTime,
+                        earliestRefundTime, // uint64 earliestRefundTime,
                         dstChainId, // uint64 dstChainId,
                         owner.address, // address dstAddress,
                         bidId, // bytes32 bidId,
@@ -248,17 +268,17 @@ describe("Otmoic", function () {
 
                 await expect(
                     otmoic.confirmTransferOut(
-                        owner.address, // address _sender,
-                        otherAccount.address, // address _receiver,
-                        tercSrc.address, // address _token,
-                        token_amount, // uint256 _token_amount,
-                        eth_amount, // uint256 _eth_amount,
-                        hashlock, // bytes32 _hashlock,
-                        relayHashlock, // bytes32 _relayHashlock,
-                        stepTimelock, // uint64 _stepTimelock,
-                        preimage, // bytes32 _preimage,
-                        relayPreimage, // bytes32 _relayPreimage,
-                        agreementReachedTime, // uint64 _agreementReachedTime
+                        owner.address,
+                        otherAccount.address,
+                        tercSrc.address,
+                        token_amount,
+                        eth_amount,
+                        hashlock,
+                        expectedSingleStepTime,
+                        tolerantSingleStepTime,
+                        earliestRefundTime,
+                        preimage,
+                        agreementReachedTime,
                     ),
                 )
                     .to.emit(otmoic, "LogTransferOutConfirmed")
@@ -278,38 +298,39 @@ describe("Otmoic", function () {
                 let token_amount_dst = "1000000000000000";
 
                 let agreementReachedTime = await time.latest();
-                let stepTimelock = 60;
+                let expectedSingleStepTime = 60;
+                let tolerantSingleStepTime = 120;
+                let earliestRefundTime =
+                    agreementReachedTime + 3 * expectedSingleStepTime + 3 * tolerantSingleStepTime + 1;
                 let dstChainId = "60";
                 let bidId = ethers.utils.formatBytes32String("1");
                 let eth_amount = "0";
                 let preimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(2)]);
                 let hashlock = ethers.utils.keccak256(preimage);
 
-                let relayPreimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(3)]);
-                let relayHashlock = ethers.utils.keccak256(relayPreimage);
-
                 await expect(tercSrc.approve(otmoic.address, token_amount));
 
                 await expect(
                     otmoic.transferOut(
-                        owner.address, // address _sender,
-                        otherAccount.address, // address _bridge,
-                        tercSrc.address, // address _token,
-                        token_amount, // uint256 _amount,
-                        hashlock, // bytes32 _hashlock,
-                        relayHashlock, // bytes32 _relayHashlock,
-                        stepTimelock, // uint64 _stepTimelock,
-                        dstChainId, // uint64 _dstChainId,
-                        owner.address, // address _dstAddress,
-                        bidId, // bytes32 _bidId,
-                        tercDst.address, // uint256 _tokenDst,
-                        token_amount_dst, // uint256 _amountDst,
-                        eth_amount, // uint256 _nativeAmountDst,
-                        agreementReachedTime, // uint64 _agreementReachedTime,
-                        requestor, // string calldata _requestor,
-                        lpId, // string calldata _lpId,
-                        userSign, // string calldata _userSign,
-                        lpSign, // string calldata _lpSign
+                        owner.address,
+                        otherAccount.address,
+                        tercSrc.address,
+                        token_amount,
+                        hashlock,
+                        expectedSingleStepTime,
+                        tolerantSingleStepTime,
+                        earliestRefundTime,
+                        dstChainId,
+                        owner.address,
+                        bidId,
+                        tercDst.address,
+                        token_amount_dst,
+                        eth_amount,
+                        agreementReachedTime,
+                        requestor,
+                        lpId,
+                        userSign,
+                        lpSign,
                     ),
                 )
                     .to.emit(otmoic, "LogNewTransferOut")
@@ -320,8 +341,9 @@ describe("Otmoic", function () {
                         tercSrc.address, // address token,
                         token_amount, // uint256 amount,
                         anyValue, // bytes32 hashlock, // hash of the preimage
-                        anyValue, // bytes32 relayHashlock, // hash of the relayPreimage
-                        stepTimelock, // uint64 stepTimelock, // lock timestamp = agreementReachedTime + 1 * stepTimelock
+                        expectedSingleStepTime, // uint64 expectedSingleStepTime,
+                        tolerantSingleStepTime, // uint64 tolerantSingleStepTime,
+                        earliestRefundTime, // uint64 earliestRefundTime,
                         dstChainId, // uint64 dstChainId,
                         owner.address, // address dstAddress,
                         bidId, // bytes32 bidId,
@@ -335,18 +357,19 @@ describe("Otmoic", function () {
                         lpSign, // string lpSign
                     );
 
-                await time.setNextBlockTimestamp(agreementReachedTime + 7 * stepTimelock + 1);
+                await time.setNextBlockTimestamp(earliestRefundTime + 1);
                 await expect(
                     otmoic.refundTransferOut(
-                        owner.address, // address _sender,
-                        otherAccount.address, // address _receiver,
-                        tercSrc.address, // address _token,
-                        token_amount, // uint256 _token_amount,
-                        eth_amount, // uint256 _eth_amount,
-                        hashlock, // bytes32 _hashlock,
-                        relayHashlock, // bytes32 _relayHashlock,
-                        stepTimelock, // uint64 _stepTimelock,
-                        agreementReachedTime, // uint64 _agreementReachedTime
+                        owner.address,
+                        otherAccount.address,
+                        tercSrc.address,
+                        token_amount,
+                        eth_amount,
+                        hashlock,
+                        expectedSingleStepTime,
+                        tolerantSingleStepTime,
+                        earliestRefundTime,
+                        agreementReachedTime,
                     ),
                 )
                     .to.emit(otmoic, "LogTransferOutRefunded")
