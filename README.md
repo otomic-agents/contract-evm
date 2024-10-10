@@ -72,11 +72,13 @@ npx hardhat verify --network bsc_testnet <contract_address>
 
 ## Release History
 
--   [v2.2.0: remove relay hash lock and use timelock to whitelist confirm operation](https://github.com/otmoic/otmoic-contract-evm/releases/tag/v2.2.0)
+-   [v2.2.0: remove relay hash lock and use timelock to whitelist confirm operation](https://github.com/otmoic/contract-evm/releases/tag/V2.2.0)
 
--   [v2.1.0: add fine-grained timelocks to control process](https://github.com/otmoic/otmoic-contract-evm/releases/tag/v2.1.0)
+-   [v2.1.1: calculate fee at swap start phase](https://github.com/otmoic/contract-evm/releases/tag/v2.1.1)
 
--   [v2.0.0: implement Otmoic contract](https://github.com/otmoic/otmoic-contract-evm/releases/tag/v2.0.0)
+-   [v2.1.0: add fine-grained timelocks to control process](https://github.com/otmoic/contract-evm/releases/tag/V2.1.0)
+
+-   [v2.0.0: implement Otmoic contract](https://github.com/otmoic/contract-evm/releases/tag/V2.0.0)
 
 ## Contact
 
