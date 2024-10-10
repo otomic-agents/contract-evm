@@ -54,6 +54,10 @@ module.exports = {
             url: `https://optimism.llamarpc.com`,
             accounts: [PRIV_KEY],
         },
+        mainnet: {
+            url: `https://eth.drpc.org`,
+            accounts: [PRIV_KEY],
+        },
     },
     etherscan: {
         apiKey: {
@@ -63,6 +67,7 @@ module.exports = {
             avax_fuji: "snowtrace", // apiKey is not required, just set a placeholder
             optimisticEthereum: "ISUHZJG8JF1XQ4M3YPBVGHG7K812CI1FFB",
             bsc: "N7IS8JC3BRGM2G667A2N3V5IZHH3XUKG84",
+            mainnet: "BJIA288DDAYW3FXF7YR9E7MKBYKQS8J39K",
         },
         customChains: [
             {

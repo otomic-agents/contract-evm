@@ -34,14 +34,15 @@ async function main() {
 
     let nativeTokenAddress = "0x0000000000000000000000000000000000000000";
     let preimage = new Array(32).fill(2);
-    let relayPreimage = new Array(32).fill(3);
     let hashlock = utils.keccak256(utils.solidityPack(["bytes32"], [preimage]));
-    let relayHashlock = utils.keccak256(utils.solidityPack(["bytes32"], [relayPreimage]));
 
     let stepTimelock = 60;
 
     // should modify this value when refundTransferOut
     let agreementReachedTime = Math.floor(Date.now() / 1000);
+    let expectedSingleStepTime = 60;
+    let tolerantSingleStepTime = 120;
+    let earliestRefundTime = agreementReachedTime + 3 * expectedSingleStepTime + 3 * tolerantSingleStepTime + 1;
 
     let srcChainId = 9006;
     let dstChainId = 9006;
@@ -66,8 +67,9 @@ async function main() {
             nativeTokenAddress,
             token_amount_src,
             hashlock,
-            relayHashlock,
-            stepTimelock,
+            expectedSingleStepTime,
+            tolerantSingleStepTime,
+            earliestRefundTime,
             dstChainId,
             userWallet.address,
             bidId,
@@ -94,8 +96,9 @@ async function main() {
     //     token_amount_src,
     //     eth_amount,
     //     hashlock,
-    //     relayHashlock,
-    //     stepTimelock,
+    //     expectedSingleStepTime,
+    //     tolerantSingleStepTime,
+    //     earliestRefundTime,
     //     1710901036,
     // );
     // txComfirm = await tx.wait();
@@ -110,14 +113,20 @@ async function main() {
             "address",
             "uint256",
             "bytes32",
-            "bytes32",
+            "uint64",
+            "uint64",
             "uint64",
             "uint64",
             "uint256",
             "bytes32",
             "uint256",
             "uint256",
+            "uint256",
             "uint64",
+            "string",
+            "string",
+            "string",
+            "string",
         ],
         tranferOutLog.data,
     );
@@ -133,7 +142,9 @@ async function main() {
             token_amount_dst,
             eth_amount,
             hashlock,
-            stepTimelock,
+            expectedSingleStepTime,
+            tolerantSingleStepTime,
+            earliestRefundTime,
             srcChainId,
             srcTransferId,
             agreementReachedTime,
@@ -152,7 +163,9 @@ async function main() {
     //     token_amount_dst,
     //     eth_amount,
     //     hashlock,
-    //     stepTimelock,
+    //     expectedSingleStepTime,
+    //     tolerantSingleStepTime,
+    //     earliestRefundTime,
     //     1710901036,
     // );
     // txComfirm = await tx.wait();
@@ -167,10 +180,10 @@ async function main() {
             token_amount_src,
             eth_amount,
             hashlock,
-            relayHashlock,
-            stepTimelock,
+            expectedSingleStepTime,
+            tolerantSingleStepTime,
+            earliestRefundTime,
             preimage,
-            relayPreimage,
             agreementReachedTime,
         );
     txComfirm = await tx.wait();
@@ -185,7 +198,9 @@ async function main() {
             token_amount_dst,
             eth_amount,
             hashlock,
-            stepTimelock,
+            expectedSingleStepTime,
+            tolerantSingleStepTime,
+            earliestRefundTime,
             preimage,
             agreementReachedTime,
         );

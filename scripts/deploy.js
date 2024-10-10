@@ -12,6 +12,7 @@ async function main() {
     console.log("Deploying contracts with the account:", deployer.address);
 
     console.log("Account balance:", (await deployer.getBalance()).toString());
+    console.log("Account nonce:", await deployer.getTransactionCount());
 
     const Otmoic = await hre.ethers.getContractFactory("Otmoic");
     const otmoic = await Otmoic.deploy();
