@@ -46,6 +46,10 @@ module.exports = {
             url: "https://api.avax-test.network/ext/bc/C/rpc",
             accounts: [PRIV_KEY, PRIV_KEY2],
         },
+        op_sepolia: {
+            url: `https://sepolia.optimism.io`,
+            accounts: [PRIV_KEY, PRIV_KEY2],
+        },
         bsc: {
             url: `https://bsc-dataseed.bnbchain.org`,
             accounts: [PRIV_KEY],
@@ -65,6 +69,7 @@ module.exports = {
             sepolia: "QA8SAPQZVKZJ6W684VQZJ3PZH6AB5TX9BA",
             polygonMumbai: "E744ADWCRTQ2E5NGK4HWB7JQDIQE9GB3N1",
             avax_fuji: "snowtrace", // apiKey is not required, just set a placeholder
+            op_sepolia: "ISUHZJG8JF1XQ4M3YPBVGHG7K812CI1FFB",
             optimisticEthereum: "ISUHZJG8JF1XQ4M3YPBVGHG7K812CI1FFB",
             bsc: "N7IS8JC3BRGM2G667A2N3V5IZHH3XUKG84",
             mainnet: "BJIA288DDAYW3FXF7YR9E7MKBYKQS8J39K",
@@ -76,6 +81,14 @@ module.exports = {
                 urls: {
                     apiURL: "https://api.routescan.io/v2/network/testnet/evm/43113/etherscan",
                     browserURL: "https://testnet.snowtrace.io",
+                },
+            },
+            {
+                network: "op_sepolia",
+                chainId: 11155420,
+                urls: {
+                    apiURL: "https://api-sepolia-optimism.etherscan.io/api",
+                    browserURL: "https://sepolia-optimism.etherscan.io/",
                 },
             },
         ],
