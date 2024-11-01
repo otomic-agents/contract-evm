@@ -218,6 +218,7 @@ contract Otmoic is BridgeFee {
         }
 
         uint256 _eth_mount = 0;
+        bool is_out = true;
         bytes32 _transferId = keccak256(
             abi.encodePacked(
                 _sender,
@@ -230,6 +231,7 @@ contract Otmoic is BridgeFee {
                 _token,
                 _amount,
                 _eth_mount,
+                is_out,
                 block.chainid
             )
         );
@@ -299,6 +301,7 @@ contract Otmoic is BridgeFee {
             revert ExpiredOp("transfer in", _timelock);
         }
 
+        bool is_out = false;
         bytes32 _transferId = keccak256(
             abi.encodePacked(
                 _sender,
@@ -311,6 +314,7 @@ contract Otmoic is BridgeFee {
                 _token,
                 _token_amount,
                 _eth_amount,
+                is_out,
                 block.chainid
             )
         );
@@ -352,6 +356,7 @@ contract Otmoic is BridgeFee {
         bytes32 _preimage,
         uint64 _agreementReachedTime
     ) external {
+        bool is_out = true;
         bytes32 _transferId = keccak256(
             abi.encodePacked(
                 _sender,
@@ -364,6 +369,7 @@ contract Otmoic is BridgeFee {
                 _token,
                 _token_amount,
                 _eth_amount,
+                is_out,
                 block.chainid
             )
         );
@@ -411,6 +417,7 @@ contract Otmoic is BridgeFee {
         bytes32 _preimage,
         uint64 _agreementReachedTime
     ) external {
+        bool is_out = false;
         bytes32 _transferId = keccak256(
             abi.encodePacked(
                 _sender,
@@ -423,6 +430,7 @@ contract Otmoic is BridgeFee {
                 _token,
                 _token_amount,
                 _eth_amount,
+                is_out,
                 block.chainid
             )
         );
@@ -468,6 +476,7 @@ contract Otmoic is BridgeFee {
         uint64 _earliestRefundTime,
         uint64 _agreementReachedTime
     ) external {
+        bool is_out = true;
         bytes32 _transferId = keccak256(
             abi.encodePacked(
                 _sender,
@@ -480,6 +489,7 @@ contract Otmoic is BridgeFee {
                 _token,
                 _token_amount,
                 _eth_amount,
+                is_out,
                 block.chainid
             )
         );
@@ -510,6 +520,7 @@ contract Otmoic is BridgeFee {
         uint64 _earliestRefundTime,
         uint64 _agreementReachedTime
     ) external {
+        bool is_out = false;
         bytes32 _transferId = keccak256(
             abi.encodePacked(
                 _sender,
@@ -522,6 +533,7 @@ contract Otmoic is BridgeFee {
                 _token,
                 _token_amount,
                 _eth_amount,
+                is_out,
                 block.chainid
             )
         );
