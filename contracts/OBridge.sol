@@ -399,7 +399,7 @@ contract Otmoic is BridgeFee {
 
         _confirm(_transferId, _receiver, _token, _token_amount, _eth_amount);
 
-        swapStatus[_transferId].transferStatus = TransferStatus.Confirmed;
+        delete swapStatus[_transferId];
 
         emit LogTransferOutConfirmed(_transferId, _preimage);
     }
@@ -459,7 +459,7 @@ contract Otmoic is BridgeFee {
 
         _confirm(_transferId, _receiver, _token, _token_amount, _eth_amount);
 
-        swapStatus[_transferId].transferStatus = TransferStatus.Confirmed;
+        delete swapStatus[_transferId];
 
         emit LogTransferInConfirmed(_transferId, _preimage);
     }
@@ -503,7 +503,7 @@ contract Otmoic is BridgeFee {
 
         _refund(_sender, _token, _token_amount, _eth_amount);
 
-        swapStatus[_transferId].transferStatus = TransferStatus.Refunded;
+        delete swapStatus[_transferId];
 
         emit LogTransferOutRefunded(_transferId);
     }
@@ -547,7 +547,7 @@ contract Otmoic is BridgeFee {
 
         _refund(_sender, _token, _token_amount, _eth_amount);
 
-        swapStatus[_transferId].transferStatus = TransferStatus.Refunded;
+        delete swapStatus[_transferId];
 
         emit LogTransferInRefunded(_transferId);
     }

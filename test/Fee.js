@@ -103,7 +103,7 @@ describe("Otmoic", function () {
                 let feeRecepientTokenSrcBalanceBefore = await tercSrc.balanceOf(feeRecepient.address);
                 let feeRecepientTokenDstBalanceBefore = await tercDst.balanceOf(feeRecepient.address);
 
-                await expect(tercSrc.connect(user).approve(otmoic.address, token_amount_src));
+                await tercSrc.connect(user).approve(otmoic.address, token_amount_src);
 
                 let userTokenSrcBalanceBefore = await tercSrc.balanceOf(user.address);
                 let userTokenDstBalanceBefore = await tercDst.balanceOf(user.address);
@@ -137,7 +137,7 @@ describe("Otmoic", function () {
                     .withArgs(user.address, otmoic.address, token_amount_src);
 
                 let userNativeBalanceBefore = await user.getBalance();
-                await expect(tercDst.connect(lp).approve(otmoic.address, token_amount_dst));
+                await tercDst.connect(lp).approve(otmoic.address, token_amount_dst);
 
                 let lpNativeBalanceBefore = await lp.getBalance();
                 let lpTokenSrcBalanceBefore = await tercSrc.balanceOf(lp.address);

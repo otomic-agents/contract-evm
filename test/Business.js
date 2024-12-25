@@ -86,7 +86,7 @@ describe("Otmoic", function () {
                     .to.emit(tercDst, "Transfer")
                     .withArgs(owner.address, lp.address, token_amount_dst);
 
-                await expect(tercSrc.connect(user).approve(otmoic.address, token_amount_src));
+                await tercSrc.connect(user).approve(otmoic.address, token_amount_src);
                 await expect(
                     otmoic
                         .connect(user)
@@ -115,7 +115,7 @@ describe("Otmoic", function () {
                     .to.emit(tercSrc, "Transfer")
                     .withArgs(user.address, otmoic.address, token_amount_src);
 
-                await expect(tercDst.connect(lp).approve(otmoic.address, token_amount_dst));
+                await tercDst.connect(lp).approve(otmoic.address, token_amount_dst);
                 await expect(
                     otmoic
                         .connect(lp)
@@ -246,7 +246,7 @@ describe("Otmoic", function () {
                     .to.emit(otmoic, "LogNewTransferOut")
                     .and.changeEtherBalance(otmoic, token_amount_src);
 
-                await expect(tercDst.connect(lp).approve(otmoic.address, token_amount_dst));
+                await tercDst.connect(lp).approve(otmoic.address, token_amount_dst);
                 await expect(
                     otmoic
                         .connect(lp)
@@ -345,7 +345,7 @@ describe("Otmoic", function () {
                     .to.emit(tercSrc, "Transfer")
                     .withArgs(owner.address, user.address, token_amount_src);
 
-                await expect(tercSrc.connect(user).approve(otmoic.address, token_amount_src));
+                await tercSrc.connect(user).approve(otmoic.address, token_amount_src);
                 await expect(
                     otmoic
                         .connect(user)

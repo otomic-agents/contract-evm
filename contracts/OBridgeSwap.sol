@@ -122,7 +122,7 @@ contract OtmoicSwap is BridgeFee {
 
     mapping(bytes32 => SwapStatus) public swapStatus;
 
-    event LogInitSwap(
+    event LogSwapSubmitted(
         bytes32 transferId,
         address sender,
         address receiver,
@@ -150,7 +150,7 @@ contract OtmoicSwap is BridgeFee {
 
     receive() external payable {}
 
-    function initSwap(
+    function submitSwap(
         address _sender,
         address _receiver,
         address _srcToken,
@@ -174,8 +174,8 @@ contract OtmoicSwap is BridgeFee {
         }
 
         uint64 _timelock = _agreementReachedTime + 1 * _stepTime;
-        if (block.timestamp > _timelock) {
-            revert ExpiredOp("initSwap", _timelock);
+        if (block.timestamp >= _timelock) {
+            revert ExpiredOp("submitSwap", _timelock);
         }
 
         bytes32 _transferId = keccak256(
@@ -201,7 +201,7 @@ contract OtmoicSwap is BridgeFee {
         swapStatus[_transferId].srcTokenFee = calcFee(_srcToken, _srcAmount);
         swapStatus[_transferId].dstTokenFee = calcFee(_dstToken, _dstAmount);
 
-        emit LogInitSwap(
+        emit LogSwapSubmitted(
             _transferId,
             _sender,
             _receiver,
@@ -234,7 +234,7 @@ contract OtmoicSwap is BridgeFee {
         }
 
         uint64 _timelock = _agreementReachedTime + 2 * _stepTime;
-        if (block.timestamp > _timelock) {
+        if (block.timestamp >= _timelock) {
             revert ExpiredOp("confirmSwap", _timelock);
         }
 
@@ -257,8 +257,7 @@ contract OtmoicSwap is BridgeFee {
 
         _confirm(_transferId, _sender, _receiver, _srcToken, _srcAmount, _dstToken, _dstAmount);
 
-        swapStatus[_transferId].transferStatus = TransferStatus.Confirmed;
-
+        delete swapStatus[_transferId];
         emit LogSwapConfirmed(_transferId);
     }
 
@@ -296,7 +295,7 @@ contract OtmoicSwap is BridgeFee {
 
         _refund(_sender, _srcToken, _srcAmount);
 
-        swapStatus[_transferId].transferStatus = TransferStatus.Refunded;
+        delete swapStatus[_transferId];
 
         emit LogSwapRefunded(_transferId);
     }

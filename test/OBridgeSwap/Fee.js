@@ -85,11 +85,11 @@ describe("OtmoicSwap contract", function () {
                     .to.emit(tercDst, "Transfer")
                     .withArgs(owner.address, lp.address, token_amount_dst);
 
-                await expect(tercSrc.connect(user).approve(otmoicSwap.address, token_amount_src));
+                await tercSrc.connect(user).approve(otmoicSwap.address, token_amount_src);
                 await expect(
                     otmoicSwap
                         .connect(user)
-                        .initSwap(
+                        .submitSwap(
                             user.address,
                             lp.address,
                             tercSrc.address,
@@ -107,7 +107,7 @@ describe("OtmoicSwap contract", function () {
                 )
                     .to.emit(tercSrc, "Transfer")
                     .withArgs(user.address, otmoicSwap.address, token_amount_src)
-                    .and.emit(otmoicSwap, "LogInitSwap")
+                    .and.emit(otmoicSwap, "LogSwapSubmitted")
                     .withArgs(
                         anyValue,
                         user.address,
@@ -125,7 +125,7 @@ describe("OtmoicSwap contract", function () {
                         lpSign,
                     );
 
-                await expect(tercDst.connect(lp).approve(otmoicSwap.address, token_amount_dst));
+                await tercDst.connect(lp).approve(otmoicSwap.address, token_amount_dst);
                 await expect(
                     otmoicSwap
                         .connect(lp)
@@ -182,11 +182,11 @@ describe("OtmoicSwap contract", function () {
                     .to.emit(tercDst, "Transfer")
                     .withArgs(owner.address, lp.address, token_amount_dst);
 
-                await expect(tercSrc.connect(user).approve(otmoicSwap.address, token_amount_src));
+                await tercSrc.connect(user).approve(otmoicSwap.address, token_amount_src);
                 await expect(
                     otmoicSwap
                         .connect(user)
-                        .initSwap(
+                        .submitSwap(
                             user.address,
                             lp.address,
                             tercSrc.address,
@@ -204,7 +204,7 @@ describe("OtmoicSwap contract", function () {
                 )
                     .to.emit(tercSrc, "Transfer")
                     .withArgs(user.address, otmoicSwap.address, token_amount_src)
-                    .and.emit(otmoicSwap, "LogInitSwap")
+                    .and.emit(otmoicSwap, "LogSwapSubmitted")
                     .withArgs(
                         anyValue,
                         user.address,
@@ -279,7 +279,7 @@ describe("OtmoicSwap contract", function () {
                 await expect(
                     otmoicSwap
                         .connect(user)
-                        .initSwap(
+                        .submitSwap(
                             user.address,
                             lp.address,
                             nativeTokenAddress,
@@ -298,7 +298,7 @@ describe("OtmoicSwap contract", function () {
                             },
                         ),
                 )
-                    .to.emit(otmoicSwap, "LogInitSwap")
+                    .to.emit(otmoicSwap, "LogSwapSubmitted")
                     .withArgs(
                         anyValue,
                         user.address,
@@ -317,7 +317,7 @@ describe("OtmoicSwap contract", function () {
                     )
                     .and.changeEtherBalance(otmoicSwap, token_amount_src);
 
-                await expect(tercDst.connect(lp).approve(otmoicSwap.address, token_amount_dst));
+                await tercDst.connect(lp).approve(otmoicSwap.address, token_amount_dst);
                 await expect(
                     otmoicSwap
                         .connect(lp)
@@ -373,7 +373,7 @@ describe("OtmoicSwap contract", function () {
                 await expect(
                     otmoicSwap
                         .connect(user)
-                        .initSwap(
+                        .submitSwap(
                             user.address,
                             lp.address,
                             nativeTokenAddress,
@@ -392,7 +392,7 @@ describe("OtmoicSwap contract", function () {
                             },
                         ),
                 )
-                    .to.emit(otmoicSwap, "LogInitSwap")
+                    .to.emit(otmoicSwap, "LogSwapSubmitted")
                     .withArgs(
                         anyValue,
                         user.address,
@@ -464,11 +464,11 @@ describe("OtmoicSwap contract", function () {
                     .to.emit(tercSrc, "Transfer")
                     .withArgs(owner.address, user.address, token_amount_src);
 
-                await expect(tercSrc.connect(user).approve(otmoicSwap.address, token_amount_src));
+                await tercSrc.connect(user).approve(otmoicSwap.address, token_amount_src);
                 await expect(
                     otmoicSwap
                         .connect(user)
-                        .initSwap(
+                        .submitSwap(
                             user.address,
                             lp.address,
                             tercSrc.address,
@@ -484,7 +484,7 @@ describe("OtmoicSwap contract", function () {
                             lpSign,
                         ),
                 )
-                    .to.emit(otmoicSwap, "LogInitSwap")
+                    .to.emit(otmoicSwap, "LogSwapSubmitted")
                     .withArgs(
                         anyValue,
                         user.address,

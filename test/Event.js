@@ -54,7 +54,7 @@ describe("Otmoic", function () {
                 // console.log('otmoic address:', otmoic.address)
                 // console.log('tercSrc address:', tercSrc.address)
 
-                await expect(tercSrc.approve(otmoic.address, token_amount));
+                await tercSrc.approve(otmoic.address, token_amount);
 
                 await expect(
                     otmoic.transferIn(
@@ -132,7 +132,7 @@ describe("Otmoic", function () {
                 // console.log('otmoic address:', otmoic.address)
                 // console.log('tercSrc address:', tercSrc.address)
 
-                await expect(tercSrc.approve(otmoic.address, token_amount));
+                await tercSrc.approve(otmoic.address, token_amount);
 
                 await expect(
                     otmoic.transferIn(
@@ -217,7 +217,7 @@ describe("Otmoic", function () {
                 let preimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(2)]);
                 let hashlock = ethers.utils.keccak256(preimage);
 
-                await expect(tercSrc.approve(otmoic.address, token_amount));
+                await tercSrc.approve(otmoic.address, token_amount);
 
                 await expect(
                     otmoic.transferOut(
@@ -308,7 +308,7 @@ describe("Otmoic", function () {
                 let preimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(2)]);
                 let hashlock = ethers.utils.keccak256(preimage);
 
-                await expect(tercSrc.approve(otmoic.address, token_amount));
+                await tercSrc.approve(otmoic.address, token_amount);
 
                 await expect(
                     otmoic.transferOut(
