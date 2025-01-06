@@ -58,9 +58,9 @@ describe("Otmoic", function () {
                 // on source chain, user transfer token_amount_src TokenA to lp with 10% fee
                 let token_amount_src = ethers.BigNumber.from("1000000000000000000");
 
-                // on destination chain, lp transfer token_amount_dst TokenB and eth_amount ETH to user with 10% fee
+                // on destination chain, lp transfer token_amount_dst TokenB and ethAmount ETH to user with 10% fee
                 let token_amount_dst = ethers.BigNumber.from("1000000000000000");
-                let eth_amount = ethers.BigNumber.from("1000000000000000");
+                let ethAmount = ethers.BigNumber.from("1000000000000000");
 
                 // set fee to 10%
                 await otmoic.connect(owner).setBasisPointsRate(1000);
@@ -68,7 +68,7 @@ describe("Otmoic", function () {
 
                 let token_amount_src_fee = token_amount_src.mul(1000).div(10000);
                 let token_amount_dst_fee = token_amount_dst.mul(1000).div(10000);
-                let eth_amount_fee = eth_amount.mul(1000).div(10000);
+                let eth_amount_fee = ethAmount.mul(1000).div(10000);
 
                 let srcTransferId = new Array(32).fill(3);
                 let preimage = new Array(32).fill(2);
@@ -125,7 +125,7 @@ describe("Otmoic", function () {
                             bidId,
                             tercDst.address,
                             token_amount_dst,
-                            eth_amount,
+                            ethAmount,
                             agreementReachedTime,
                             requestor,
                             lpId,
@@ -151,7 +151,7 @@ describe("Otmoic", function () {
                             user.address,
                             tercDst.address,
                             token_amount_dst,
-                            eth_amount,
+                            ethAmount,
                             hashlock,
                             expectedSingleStepTime,
                             tolerantSingleStepTime,
@@ -159,7 +159,7 @@ describe("Otmoic", function () {
                             srcChainId,
                             srcTransferId,
                             agreementReachedTime,
-                            { value: eth_amount },
+                            { value: ethAmount },
                         ),
                 )
                     .to.emit(tercDst, "Transfer")
@@ -179,7 +179,7 @@ describe("Otmoic", function () {
                             user.address,
                             tercDst.address,
                             token_amount_dst,
-                            eth_amount,
+                            ethAmount,
                             hashlock,
                             expectedSingleStepTime,
                             tolerantSingleStepTime,
@@ -234,7 +234,7 @@ describe("Otmoic", function () {
                 expect(feeRecepientTokenDstBalanceDiff).to.equal(token_amount_dst_fee);
 
                 let userNativeBalanceDiff = (await user.getBalance()).sub(userNativeBalanceBefore);
-                expect(userNativeBalanceDiff).to.equal(eth_amount.sub(eth_amount_fee));
+                expect(userNativeBalanceDiff).to.equal(ethAmount.sub(eth_amount_fee));
 
                 let userTokenSrcBalanceDiff = userTokenSrcBalanceBefore.sub(await tercSrc.balanceOf(user.address));
                 expect(userTokenSrcBalanceDiff).to.equal(token_amount_src);

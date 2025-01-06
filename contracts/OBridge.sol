@@ -149,8 +149,8 @@ contract Otmoic is BridgeFee {
         address sender,
         address receiver,
         address token,
-        uint256 token_amount,
-        uint256 eth_amount,
+        uint256 tokenAmount,
+        uint256 ethAmount,
         bytes32 hashlock, // hash of the preimage
         uint64 expectedSingleStepTime,
         uint64 tolerantSingleStepTime,

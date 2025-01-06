@@ -45,7 +45,7 @@ describe("Otmoic", function () {
 
             let token_amount_src = "1000000000000000000";
             let token_amount_dst = "1000000000000000";
-            let eth_amount = "0";
+            let ethAmount = "0";
 
             let srcTransferId = new Array(32).fill(3);
             let preimage = new Array(32).fill(2);
@@ -81,7 +81,7 @@ describe("Otmoic", function () {
                         bidId,
                         tercDst.address,
                         token_amount_dst,
-                        eth_amount,
+                        ethAmount,
                         agreementReachedTime,
                         requestor,
                         lpId,
@@ -102,7 +102,7 @@ describe("Otmoic", function () {
                         user.address,
                         tercDst.address,
                         token_amount_dst,
-                        eth_amount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -110,7 +110,7 @@ describe("Otmoic", function () {
                         srcChainId,
                         srcTransferId,
                         agreementReachedTime,
-                        { value: eth_amount },
+                        { value: ethAmount },
                     ),
             )
                 .to.be.revertedWithCustomError(otmoic, "ExpiredOp")
@@ -122,7 +122,7 @@ describe("Otmoic", function () {
 
             let token_amount_src = "1000000000000000000";
             let token_amount_dst = "1000000000000000";
-            let eth_amount = "0";
+            let ethAmount = "0";
 
             let srcTransferId = new Array(32).fill(3);
             let preimage = new Array(32).fill(2);
@@ -157,7 +157,7 @@ describe("Otmoic", function () {
                     bidId,
                     tercDst.address,
                     token_amount_dst,
-                    eth_amount,
+                    ethAmount,
                     agreementReachedTime,
                     requestor,
                     lpId,
@@ -173,7 +173,7 @@ describe("Otmoic", function () {
                     user.address,
                     tercDst.address,
                     token_amount_dst,
-                    eth_amount,
+                    ethAmount,
                     hashlock,
                     expectedSingleStepTime,
                     tolerantSingleStepTime,
@@ -181,7 +181,7 @@ describe("Otmoic", function () {
                     srcChainId,
                     srcTransferId,
                     agreementReachedTime,
-                    { value: eth_amount },
+                    { value: ethAmount },
                 );
 
             // user cannot confirm out after agreementReachedTime + 3 * expectedSingleStepTime
@@ -194,7 +194,7 @@ describe("Otmoic", function () {
                         lp.address,
                         tercSrc.address,
                         token_amount_src,
-                        eth_amount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -218,7 +218,7 @@ describe("Otmoic", function () {
                         user.address,
                         tercDst.address,
                         token_amount_dst,
-                        eth_amount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -245,7 +245,7 @@ describe("Otmoic", function () {
                         user.address,
                         tercDst.address,
                         token_amount_dst,
-                        eth_amount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -273,7 +273,7 @@ describe("Otmoic", function () {
                         lp.address,
                         tercSrc.address,
                         token_amount_src,
-                        eth_amount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -295,7 +295,7 @@ describe("Otmoic", function () {
 
             let token_amount_src = "1000000000000000000";
             let token_amount_dst = "1000000000000000";
-            let eth_amount = "0";
+            let ethAmount = "0";
 
             let srcTransferId = new Array(32).fill(3);
             let preimage = new Array(32).fill(2);
@@ -330,7 +330,7 @@ describe("Otmoic", function () {
                     bidId,
                     tercDst.address,
                     token_amount_dst,
-                    eth_amount,
+                    ethAmount,
                     agreementReachedTime,
                     requestor,
                     lpId,
@@ -346,7 +346,7 @@ describe("Otmoic", function () {
                     user.address,
                     tercDst.address,
                     token_amount_dst,
-                    eth_amount,
+                    ethAmount,
                     hashlock,
                     expectedSingleStepTime,
                     tolerantSingleStepTime,
@@ -354,7 +354,7 @@ describe("Otmoic", function () {
                     srcChainId,
                     srcTransferId,
                     agreementReachedTime,
-                    { value: eth_amount },
+                    { value: ethAmount },
                 );
 
             await time.setNextBlockTimestamp(
@@ -368,7 +368,7 @@ describe("Otmoic", function () {
                         user.address,
                         tercDst.address,
                         token_amount_dst,
-                        eth_amount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -389,7 +389,7 @@ describe("Otmoic", function () {
                         lp.address,
                         tercSrc.address,
                         token_amount_src,
-                        eth_amount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -405,7 +405,7 @@ describe("Otmoic", function () {
 
             let token_amount_src = "1000000000000000000";
             let token_amount_dst = "1000000000000000";
-            let eth_amount = "0";
+            let ethAmount = "0";
 
             let srcTransferId = new Array(32).fill(3);
             let preimage = new Array(32).fill(2);
@@ -440,7 +440,7 @@ describe("Otmoic", function () {
                     bidId,
                     tercDst.address,
                     token_amount_dst,
-                    eth_amount,
+                    ethAmount,
                     agreementReachedTime,
                     requestor,
                     lpId,
@@ -456,7 +456,7 @@ describe("Otmoic", function () {
                     user.address,
                     tercDst.address,
                     token_amount_dst,
-                    eth_amount,
+                    ethAmount,
                     hashlock,
                     expectedSingleStepTime,
                     tolerantSingleStepTime,
@@ -464,7 +464,7 @@ describe("Otmoic", function () {
                     srcChainId,
                     srcTransferId,
                     agreementReachedTime,
-                    { value: eth_amount },
+                    { value: ethAmount },
                 );
 
             await time.setNextBlockTimestamp(earliestRefundTime - 1);
@@ -476,7 +476,7 @@ describe("Otmoic", function () {
                         lp.address,
                         tercSrc.address,
                         token_amount_src,
-                        eth_amount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -496,7 +496,7 @@ describe("Otmoic", function () {
                         user.address,
                         tercDst.address,
                         token_amount_dst,
-                        eth_amount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -513,7 +513,7 @@ describe("Otmoic", function () {
 
             let token_amount_src = "1000000000000000000";
             let token_amount_dst = "1000000000000000";
-            let eth_amount = "0";
+            let ethAmount = "0";
 
             let srcTransferId = new Array(32).fill(3);
             let preimage = new Array(32).fill(2);
@@ -549,7 +549,7 @@ describe("Otmoic", function () {
                         bidId,
                         tercDst.address,
                         token_amount_dst,
-                        eth_amount,
+                        ethAmount,
                         agreementReachedTime,
                         requestor,
                         lpId,
@@ -564,7 +564,7 @@ describe("Otmoic", function () {
 
             let token_amount_src = "1000000000000000000";
             let token_amount_dst = "1000000000000000";
-            let eth_amount = "0";
+            let ethAmount = "0";
 
             let srcTransferId = new Array(32).fill(3);
             let preimage = new Array(32).fill(2);
@@ -599,7 +599,7 @@ describe("Otmoic", function () {
                     bidId,
                     tercDst.address,
                     token_amount_dst,
-                    eth_amount,
+                    ethAmount,
                     agreementReachedTime,
                     requestor,
                     lpId,
@@ -615,7 +615,7 @@ describe("Otmoic", function () {
                     user.address,
                     tercDst.address,
                     token_amount_dst,
-                    eth_amount,
+                    ethAmount,
                     hashlock,
                     expectedSingleStepTime,
                     tolerantSingleStepTime,
@@ -623,7 +623,7 @@ describe("Otmoic", function () {
                     srcChainId,
                     srcTransferId,
                     agreementReachedTime,
-                    { value: eth_amount },
+                    { value: ethAmount },
                 );
 
             // user can call confirm out after agreementReachedTime + 3 * expectedSingleStepTime + 2 * tolerantSingleStepTime
@@ -638,7 +638,7 @@ describe("Otmoic", function () {
                         user.address,
                         tercDst.address,
                         token_amount_dst,
-                        eth_amount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,

@@ -48,7 +48,7 @@ async function main() {
     let dstChainId = 9006;
 
     let bidId = ethers.utils.formatBytes32String("2");
-    let eth_amount = "0";
+    let ethAmount = "0";
 
     let requestor = "did:requestor";
     let lpId = "did:lp";
@@ -75,7 +75,7 @@ async function main() {
             bidId,
             nativeTokenAddress,
             token_amount_dst,
-            eth_amount,
+            ethAmount,
             agreementReachedTime,
             requestor,
             lpId,
@@ -94,7 +94,7 @@ async function main() {
     //     lpWallet.address,
     //     nativeTokenAddress,
     //     token_amount_src,
-    //     eth_amount,
+    //     ethAmount,
     //     hashlock,
     //     expectedSingleStepTime,
     //     tolerantSingleStepTime,
@@ -140,7 +140,7 @@ async function main() {
             userWallet.address,
             nativeTokenAddress,
             token_amount_dst,
-            eth_amount,
+            ethAmount,
             hashlock,
             expectedSingleStepTime,
             tolerantSingleStepTime,
@@ -161,7 +161,7 @@ async function main() {
     //     userWallet.address,
     //     nativeTokenAddress,
     //     token_amount_dst,
-    //     eth_amount,
+    //     ethAmount,
     //     hashlock,
     //     expectedSingleStepTime,
     //     tolerantSingleStepTime,
@@ -178,7 +178,7 @@ async function main() {
             lpWallet.address,
             nativeTokenAddress,
             token_amount_src,
-            eth_amount,
+            ethAmount,
             hashlock,
             expectedSingleStepTime,
             tolerantSingleStepTime,
@@ -196,7 +196,7 @@ async function main() {
             userWallet.address,
             nativeTokenAddress,
             token_amount_dst,
-            eth_amount,
+            ethAmount,
             hashlock,
             expectedSingleStepTime,
             tolerantSingleStepTime,

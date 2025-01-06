@@ -45,8 +45,8 @@ describe("Otmoic", function () {
                 let srcChainId = "60";
                 let srcTransferId = new Array(32).fill(3);
 
-                let token_amount = "1000000000000000000";
-                let eth_amount = "100000000000000000";
+                let tokenAmount = "1000000000000000000";
+                let ethAmount = "100000000000000000";
 
                 let preimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(2)]);
                 let hashlock = ethers.utils.keccak256(preimage);
@@ -54,15 +54,15 @@ describe("Otmoic", function () {
                 // console.log('otmoic address:', otmoic.address)
                 // console.log('tercSrc address:', tercSrc.address)
 
-                await tercSrc.approve(otmoic.address, token_amount);
+                await tercSrc.approve(otmoic.address, tokenAmount);
 
                 await expect(
                     otmoic.transferIn(
                         owner.address,
                         otherAccount.address,
                         tercSrc.address,
-                        token_amount,
-                        eth_amount,
+                        tokenAmount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -70,7 +70,7 @@ describe("Otmoic", function () {
                         srcChainId,
                         srcTransferId,
                         agreementReachedTime,
-                        { value: eth_amount },
+                        { value: ethAmount },
                     ),
                 )
                     .to.emit(otmoic, "LogNewTransferIn")
@@ -79,8 +79,8 @@ describe("Otmoic", function () {
                         owner.address, // address sender,
                         otherAccount.address, // address receiver,
                         tercSrc.address, // address token,
-                        token_amount, // uint256 token_amount,
-                        eth_amount, // uint256 eth_amount,
+                        tokenAmount, // uint256 tokenAmount,
+                        ethAmount, // uint256 ethAmount,
                         anyValue, // bytes32 hashlock, // hash of the preimage
                         expectedSingleStepTime, // uint64 expectedSingleStepTime
                         tolerantSingleStepTime, // uint64 tolerantSingleStepTime
@@ -95,8 +95,8 @@ describe("Otmoic", function () {
                         owner.address,
                         otherAccount.address,
                         tercSrc.address,
-                        token_amount,
-                        eth_amount,
+                        tokenAmount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -123,8 +123,8 @@ describe("Otmoic", function () {
                 let srcChainId = "60";
                 let srcTransferId = new Array(32).fill(3);
 
-                let token_amount = "1000000000000000000";
-                let eth_amount = "100000000000000000";
+                let tokenAmount = "1000000000000000000";
+                let ethAmount = "100000000000000000";
 
                 let preimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(2)]);
                 let hashlock = ethers.utils.keccak256(preimage);
@@ -132,15 +132,15 @@ describe("Otmoic", function () {
                 // console.log('otmoic address:', otmoic.address)
                 // console.log('tercSrc address:', tercSrc.address)
 
-                await tercSrc.approve(otmoic.address, token_amount);
+                await tercSrc.approve(otmoic.address, tokenAmount);
 
                 await expect(
                     otmoic.transferIn(
                         owner.address,
                         otherAccount.address,
                         tercSrc.address,
-                        token_amount,
-                        eth_amount,
+                        tokenAmount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -148,7 +148,7 @@ describe("Otmoic", function () {
                         srcChainId,
                         srcTransferId,
                         agreementReachedTime,
-                        { value: eth_amount },
+                        { value: ethAmount },
                     ),
                 )
                     .to.emit(otmoic, "LogNewTransferIn")
@@ -157,8 +157,8 @@ describe("Otmoic", function () {
                         owner.address, // address sender,
                         otherAccount.address, // address receiver,
                         tercSrc.address, // address token,
-                        token_amount, // uint256 token_amount,
-                        eth_amount, // uint256 eth_amount,
+                        tokenAmount, // uint256 tokenAmount,
+                        ethAmount, // uint256 ethAmount,
                         anyValue, // bytes32 hashlock, // hash of the preimage
                         expectedSingleStepTime, // uint64 expectedSingleStepTime
                         tolerantSingleStepTime, // uint64 tolerantSingleStepTime
@@ -174,8 +174,8 @@ describe("Otmoic", function () {
                         owner.address,
                         otherAccount.address,
                         tercSrc.address,
-                        token_amount,
-                        eth_amount,
+                        tokenAmount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -203,7 +203,7 @@ describe("Otmoic", function () {
                 const ownerBalance = await tercDst.balanceOf(owner.address);
                 // console.log(ownerBalance)
 
-                let token_amount = "1000000000000000000";
+                let tokenAmount = "1000000000000000000";
                 let token_amount_dst = "1000000000000000";
 
                 let agreementReachedTime = await time.latest();
@@ -213,18 +213,18 @@ describe("Otmoic", function () {
                     agreementReachedTime + 3 * expectedSingleStepTime + 3 * tolerantSingleStepTime + 1;
                 let dstChainId = "60";
                 let bidId = ethers.utils.formatBytes32String("1");
-                let eth_amount = "0";
+                let ethAmount = "0";
                 let preimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(2)]);
                 let hashlock = ethers.utils.keccak256(preimage);
 
-                await tercSrc.approve(otmoic.address, token_amount);
+                await tercSrc.approve(otmoic.address, tokenAmount);
 
                 await expect(
                     otmoic.transferOut(
                         owner.address,
                         otherAccount.address,
                         tercSrc.address,
-                        token_amount,
+                        tokenAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -234,7 +234,7 @@ describe("Otmoic", function () {
                         bidId,
                         tercDst.address,
                         token_amount_dst,
-                        eth_amount,
+                        ethAmount,
                         agreementReachedTime,
                         requestor,
                         lpId,
@@ -248,7 +248,7 @@ describe("Otmoic", function () {
                         owner.address, // address sender,
                         otherAccount.address, // address receiver,
                         tercSrc.address, // address token,
-                        token_amount, // uint256 amount,
+                        tokenAmount, // uint256 amount,
                         anyValue, // bytes32 hashlock, // hash of the preimage
                         expectedSingleStepTime, // uint64 expectedSingleStepTime,
                         tolerantSingleStepTime, // uint64 tolerantSingleStepTime,
@@ -258,7 +258,7 @@ describe("Otmoic", function () {
                         bidId, // bytes32 bidId,
                         tercDst.address, // uint256 tokenDst,
                         token_amount_dst, // uint256 amountDst,
-                        eth_amount, // uint256 nativeAmountDst,
+                        ethAmount, // uint256 nativeAmountDst,
                         agreementReachedTime, // uint64 agreementReachedTime,
                         requestor, // string requestor,
                         lpId, // string lpId,
@@ -271,8 +271,8 @@ describe("Otmoic", function () {
                         owner.address,
                         otherAccount.address,
                         tercSrc.address,
-                        token_amount,
-                        eth_amount,
+                        tokenAmount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -294,7 +294,7 @@ describe("Otmoic", function () {
                 const ownerBalance = await tercDst.balanceOf(owner.address);
                 // console.log(ownerBalance)
 
-                let token_amount = "1000000000000000000";
+                let tokenAmount = "1000000000000000000";
                 let token_amount_dst = "1000000000000000";
 
                 let agreementReachedTime = await time.latest();
@@ -304,18 +304,18 @@ describe("Otmoic", function () {
                     agreementReachedTime + 3 * expectedSingleStepTime + 3 * tolerantSingleStepTime + 1;
                 let dstChainId = "60";
                 let bidId = ethers.utils.formatBytes32String("1");
-                let eth_amount = "0";
+                let ethAmount = "0";
                 let preimage = ethers.utils.solidityPack(["bytes32"], [new Array(32).fill(2)]);
                 let hashlock = ethers.utils.keccak256(preimage);
 
-                await tercSrc.approve(otmoic.address, token_amount);
+                await tercSrc.approve(otmoic.address, tokenAmount);
 
                 await expect(
                     otmoic.transferOut(
                         owner.address,
                         otherAccount.address,
                         tercSrc.address,
-                        token_amount,
+                        tokenAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
@@ -325,7 +325,7 @@ describe("Otmoic", function () {
                         bidId,
                         tercDst.address,
                         token_amount_dst,
-                        eth_amount,
+                        ethAmount,
                         agreementReachedTime,
                         requestor,
                         lpId,
@@ -339,7 +339,7 @@ describe("Otmoic", function () {
                         owner.address, // address sender,
                         otherAccount.address, // address receiver,
                         tercSrc.address, // address token,
-                        token_amount, // uint256 amount,
+                        tokenAmount, // uint256 amount,
                         anyValue, // bytes32 hashlock, // hash of the preimage
                         expectedSingleStepTime, // uint64 expectedSingleStepTime,
                         tolerantSingleStepTime, // uint64 tolerantSingleStepTime,
@@ -349,7 +349,7 @@ describe("Otmoic", function () {
                         bidId, // bytes32 bidId,
                         tercDst.address, // uint256 tokenDst,
                         token_amount_dst, // uint256 amountDst,
-                        eth_amount, // uint256 nativeAmountDst,
+                        ethAmount, // uint256 nativeAmountDst,
                         agreementReachedTime, // uint64 agreementReachedTime,
                         requestor, // string requestor,
                         lpId, // string lpId,
@@ -363,8 +363,8 @@ describe("Otmoic", function () {
                         owner.address,
                         otherAccount.address,
                         tercSrc.address,
-                        token_amount,
-                        eth_amount,
+                        tokenAmount,
+                        ethAmount,
                         hashlock,
                         expectedSingleStepTime,
                         tolerantSingleStepTime,
